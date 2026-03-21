@@ -56,14 +56,14 @@
     gap: 10px;
   }
   .logo-img {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     object-fit: contain;
     border-radius: 50%;
   }
   .logo-emblem {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--blue) 0%, #0a2a6e 100%);
     border: 2px solid var(--blue-dark);
@@ -461,7 +461,7 @@
 
   @media (max-width: 480px) {
     .logo-text { font-size: 14px; }
-    .logo-emblem { width: 38px; height: 38px; }
+    .logo-emblem { width: 52px; height: 52px; }
   }
 </style>
 </head>
@@ -473,7 +473,7 @@
     <div class="logo">
       <img class="logo-img" src="buddylogo.png" alt="バディSC" onerror="this.style.display='none'" />
       <div>
-        <div class="logo-text">バディサッカークラブ</div>
+        <div class="logo-text">バディ世田谷</div>
         <div class="logo-sub">REFEREE MANAGEMENT</div>
         <div class="logo-badge">41TH</div>
       </div>
@@ -550,35 +550,14 @@
   <!-- ======================== CONFIG TAB ======================== -->
   <section class="section" id="section-settings">
     <div class="card">
-      <div class="card-title">APP SETTINGS</div>
-      <div class="form-group">
-        <label>GAS Web App URL</label>
-        <input type="url" id="settingGasUrl" placeholder="https://script.google.com/macros/s/..." />
-      </div>
-      <div class="form-group">
-        <label>ロゴ画像URL（任意）</label>
-        <input type="url" id="settingLogoUrl" placeholder="https://..." />
-      </div>
-      <button class="btn btn-primary" onclick="saveSettings()">設定を保存</button>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <div class="card-title">📋 GASセットアップ手順</div>
-      <div style="font-size:13px; line-height:2; color:var(--grey-light);">
-        <b>1.</b> Google スプレッドシートを新規作成<br>
-        <b>2.</b> 「拡張機能」→「Apps Script」を開く<br>
-        <b>3.</b> <a href="#" onclick="showGasCode()" style="color:var(--blue-light);">GASコードを表示</a>してコピー&貼り付け<br>
-        <b>4.</b> 「デプロイ」→「新しいデプロイ」→ウェブアプリ<br>
-        &emsp;実行ユーザー：自分 / アクセス：全員<br>
-        <b>5.</b> 発行されたURLを上の「GAS URL」欄に入力して保存
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
       <div class="card-title">データ操作</div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄 全データ再読み込み</button>
-      </div>
+      <p style="font-size:13px; color:var(--grey); margin-bottom:12px;">スプレッドシートとの同期を手動で行います</p>
+      <button class="btn btn-primary" onclick="loadData()">🔄 全データ再読み込み</button>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="card-title">GASコード</div>
+      <p style="font-size:13px; color:var(--grey); margin-bottom:12px;">開発者向け：Apps Scriptのソースコードを確認できます</p>
+      <button class="btn btn-ghost btn-sm" onclick="showGasCode()">📋 GASコードを表示</button>
     </div>
   </section>
 
@@ -771,7 +750,7 @@
 // GAS CODE TEMPLATE
 // =====================================================
 const GAS_CODE = `// ==========================================
-// バディサッカークラブ 41th 審判管理システム
+// バディ世田谷 41th 審判管理システム
 // Google Apps Script バックエンド
 // ==========================================
 
@@ -906,7 +885,7 @@ const HARDCODED_GAS_URL = 'https://script.google.com/macros/s/AKfycbz5pVdGbl0ZmX
 function init() {
   const cfg = JSON.parse(localStorage.getItem('buddy41_cfg') || '{}');
   state.gasUrl = HARDCODED_GAS_URL;
-  document.getElementById('settingGasUrl').value = state.gasUrl;
+  // GAS URLはハードコード済み
   if (cfg.logoUrl) applyLogoUrl(cfg.logoUrl);
   document.getElementById('gasCodeText').value = GAS_CODE;
   if (state.gasUrl) loadData();
@@ -1350,9 +1329,6 @@ async function deleteMember() {
 // SETTINGS
 // =====================================================
 function saveSettings() {
-  const logoUrl = document.getElementById('settingLogoUrl').value.trim();
-  localStorage.setItem('buddy41_cfg', JSON.stringify({ logoUrl }));
-  if (logoUrl) applyLogoUrl(logoUrl);
   showToast('設定を保存しました');
 }
 
