@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>バディSC 41th 審判管理</title>
-<link rel="icon" type="image/png" href="logo.png" />
+<link rel="icon" type="image/png" href="buddylogo.png" />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Bebas+Neue&family=Cormorant+Garamond:wght@600;700&display=swap');
 
@@ -471,8 +471,7 @@
 <header>
   <div class="header-inner">
     <div class="logo">
-      <!-- ロゴ画像がある場合: <img class="logo-img" src="logo.png" alt="バディSC" /> -->
-      <div class="logo-emblem" id="logoEmblem">BSC</div>
+      <img class="logo-img" src="buddylogo.png" alt="バディSC" onerror="this.style.display='none'" />
       <div>
         <div class="logo-text">バディサッカークラブ</div>
         <div class="logo-sub">REFEREE MANAGEMENT</div>
@@ -902,9 +901,11 @@ let state = {
 // =====================================================
 // INIT
 // =====================================================
+const HARDCODED_GAS_URL = 'https://script.google.com/macros/s/AKfycbz5pVdGbl0ZmX1cG1G6D9i5VqbC0wDFkJL1Z5YvKFI9mexJ9PgaO4NmwTdAIT97gyfsbQ/exec';
+
 function init() {
   const cfg = JSON.parse(localStorage.getItem('buddy41_cfg') || '{}');
-  state.gasUrl = cfg.gasUrl || '';
+  state.gasUrl = HARDCODED_GAS_URL;
   document.getElementById('settingGasUrl').value = state.gasUrl;
   if (cfg.logoUrl) applyLogoUrl(cfg.logoUrl);
   document.getElementById('gasCodeText').value = GAS_CODE;
@@ -1349,13 +1350,10 @@ async function deleteMember() {
 // SETTINGS
 // =====================================================
 function saveSettings() {
-  const gasUrl  = document.getElementById('settingGasUrl').value.trim();
   const logoUrl = document.getElementById('settingLogoUrl').value.trim();
-  state.gasUrl = gasUrl;
-  localStorage.setItem('buddy41_cfg', JSON.stringify({ gasUrl, logoUrl }));
+  localStorage.setItem('buddy41_cfg', JSON.stringify({ logoUrl }));
   if (logoUrl) applyLogoUrl(logoUrl);
   showToast('設定を保存しました');
-  if (gasUrl) loadData();
 }
 
 function applyLogoUrl(url) {
