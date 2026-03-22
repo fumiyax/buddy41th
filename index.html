@@ -443,7 +443,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver04</span>
+          <span class="badge-ver">ver05</span>
         </div>
       </div>
     </div>
@@ -743,28 +743,36 @@ function init() {
 
 // ===== API =====
 async function gasRequest(body) {
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
   try {
-    const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) });
+    const res = await Promise.race([
+      fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) }),
+      timeout
+    ]);
     return await res.json();
   } catch(e) {
-    try { return await (await fetch(GAS_URL + '?action=' + body.action)).json(); }
-    catch(e2) { showToast('通信エラー'); return null; }
+    try {
+      const res = await Promise.race([
+        fetch(GAS_URL + '?action=' + body.action),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
+      ]);
+      return await res.json();
+    } catch(e2) { return null; }
   }
 }
 
 async function loadData() {
   showToast('読み込み中...');
   let data = null;
-  try {
-    data = await gasRequest({ action:'getAll' });
-  } catch(e) {
-    // 通信失敗時も画面を表示する
-  }
-  state.events     = (data && data.events)     || [];
-  state.members    = (data && data.members)    || [];
-  state.attendance = (data && data.attendance) || [];
-  renderStats(); renderMonthFilter(); renderEvents(); renderMembers();
-  showToast(data ? '更新しました' : '通信エラー（オフライン表示）');
+  try { data = await gasRequest({ action:'getAll' }); } catch(e) {}
+  state.events     = (data && Array.isArray(data.events))     ? data.events     : [];
+  state.members    = (data && Array.isArray(data.members))    ? data.members    : [];
+  state.attendance = (data && Array.isArray(data.attendance)) ? data.attendance : [];
+  try { renderStats(); } catch(e) {}
+  try { renderMonthFilter(); } catch(e) {}
+  try { renderEvents(); } catch(e) { document.getElementById('eventList').innerHTML = '<div class="empty-state"><p>表示エラー。再読み込みしてください。</p></div>'; }
+  try { renderMembers(); } catch(e) { document.getElementById('memberList').innerHTML = '<div class="empty-state"><p>表示エラー。再読み込みしてください。</p></div>'; }
+  showToast(data ? '更新しました' : '通信できませんでした');
 }
 
 // ===== TABS =====
