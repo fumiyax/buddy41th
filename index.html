@@ -754,13 +754,17 @@ async function gasRequest(body) {
 
 async function loadData() {
   showToast('読み込み中...');
-  const data = await gasRequest({ action:'getAll' });
-  if (!data) return;
-  state.events     = data.events     || [];
-  state.members    = data.members    || [];
-  state.attendance = data.attendance || [];
+  let data = null;
+  try {
+    data = await gasRequest({ action:'getAll' });
+  } catch(e) {
+    // 通信失敗時も画面を表示する
+  }
+  state.events     = (data && data.events)     || [];
+  state.members    = (data && data.members)    || [];
+  state.attendance = (data && data.attendance) || [];
   renderStats(); renderMonthFilter(); renderEvents(); renderMembers();
-  showToast('更新しました');
+  showToast(data ? '更新しました' : '通信エラー（オフライン表示）');
 }
 
 // ===== TABS =====
