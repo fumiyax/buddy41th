@@ -754,15 +754,9 @@ let state = { events:[], members:[], attendance:[], selectedMonth: null };
 
 // ===== INIT =====
 function init() {
-  document.getElementById('gasCodeText').value = GAS_CODE;
+  try { document.getElementById('gasCodeText').value = GAS_CODE; } catch(e) {}
   state.selectedMonth = new Date().toISOString().slice(0,7);
-  // まず空の状態で画面を描画してからGAS通信
-  renderStats();
-  renderMonthFilter();
-  renderEvents();
-  renderMembers();
-  // 少し遅らせてからGAS通信（DOMが確実に描画された後）
-  setTimeout(loadData, 100);
+  setTimeout(loadData, 200);
 }
 
 // ===== API =====
@@ -1062,7 +1056,10 @@ function renderMembers() {
   const container = document.getElementById('memberList');
   const search    = (document.getElementById('searchInput')?.value||'').toLowerCase();
   const filterLic = document.getElementById('filterLicense')?.value||'';
-  const list = [...state.members].sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja')).filter(m => {
+  let sorted = [];
+  try { sorted = [...state.members].sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja')); }
+  catch(e) { sorted = [...state.members]; }
+  const list = sorted.filter(m => {
     if (search && !(m.name||'').toLowerCase().includes(search)) return false;
     if (filterLic && m.license!==filterLic) return false;
     return true;
