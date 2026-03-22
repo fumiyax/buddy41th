@@ -814,8 +814,9 @@ function getOrCreateSheet(name) {
       referees:   ['id','name','kana','phone','email','license','expiry','category','active','billing','note'],
       attendance: ['eventId','memberId','status','comment'],
     };
-    sh.appendRow(headers[name] || ['id']);
-    sh.getRange(1,1,1,headers[name].length).setBackground('#1241a0').setFontColor('#ffffff').setFontWeight('bold');
+    const headerRow = headers[name] || ['id'];
+    sh.appendRow(headerRow);
+    sh.getRange(1,1,1,headerRow.length).setBackground('#1241a0').setFontColor('#ffffff').setFontWeight('bold');
   }
   return sh;
 }
