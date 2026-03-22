@@ -443,7 +443,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver05</span>
+          <span class="badge-ver">ver04</span>
         </div>
       </div>
     </div>
@@ -743,12 +743,11 @@ function init() {
 
 // ===== API =====
 async function gasRequest(body) {
-  const timeout = ms => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
   try {
-    const res = await Promise.race([fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) }), timeout(15000)]);
+    const res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) });
     return await res.json();
   } catch(e) {
-    try { const res = await Promise.race([fetch(GAS_URL + '?action=' + body.action), timeout(15000)]); return await res.json(); }
+    try { return await (await fetch(GAS_URL + '?action=' + body.action)).json(); }
     catch(e2) { showToast('通信エラー'); return null; }
   }
 }
@@ -756,11 +755,7 @@ async function gasRequest(body) {
 async function loadData() {
   showToast('読み込み中...');
   const data = await gasRequest({ action:'getAll' });
-  if (!data) {
-    renderStats(); renderMonthFilter(); renderEvents(); renderMembers();
-    showToast('通信エラー：データを取得できませんでした');
-    return;
-  }
+  if (!data) return;
   state.events     = data.events     || [];
   state.members    = data.members    || [];
   state.attendance = data.attendance || [];
@@ -957,7 +952,10 @@ function openEventModal(id) {
   document.getElementById('deleteEventBtn').style.display = ev ? 'block' : 'none';
   document.getElementById('eventOverlay').classList.add('show');
 }
-function closeEventModal() { document.getElementById('eventOverlay').classList.remove('show'); }
+function closeAllModals() {
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('show'));
+}
+function closeEventModal()  { document.getElementById('eventOverlay').classList.remove('show'); }
 
 async function saveEvent() {
   const data = {
@@ -986,7 +984,7 @@ async function deleteEvent() {
   state.events     = state.events.filter(e => e.id!=id);
   state.attendance = state.attendance.filter(a => a.eventId!=id);
   renderStats(); renderEvents();
-  closeEventModal(); showToast('削除しました');
+  closeAllModals(); showToast('削除しました');
   await gasRequest({ action:'deleteEvent', id });
 }
 
@@ -1053,7 +1051,7 @@ async function deleteMember() {
   const id = document.getElementById('memberId').value;
   state.members = state.members.filter(m => m.id!=id);
   renderMembers(); renderStats();
-  closeMemberModal(); showToast('削除しました');
+  closeAllModals(); showToast('削除しました');
   await gasRequest({ action:'deleteMember', id });
 }
 
@@ -1076,7 +1074,7 @@ function showToast(msg) {
 
 // ===== OVERLAY CLOSE =====
 document.querySelectorAll('.overlay').forEach(ov => {
-  ov.addEventListener('click', e => { if (e.target===ov) ov.classList.remove('show'); });
+  ov.addEventListener('click', e => { if (e.target===ov) closeAllModals(); });
 });
 
 init();
