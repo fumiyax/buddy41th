@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>バディ世田谷 41th 審判管理</title>
+<title>バディ世田谷審判管理</title>
 <link rel="icon" type="image/png" href="buddylogo.png" />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Bebas+Neue&display=swap');
@@ -75,13 +75,13 @@
   .badge-41 {
     background: #ffd700; color: var(--blue);
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 13px; letter-spacing: 1px;
-    padding: 1px 8px; border-radius: 3px;
+    font-size: 18px; letter-spacing: 2px;
+    padding: 2px 12px; border-radius: 4px;
   }
   .badge-ver {
-    background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85);
-    font-size: 9px; font-weight: 700;
-    padding: 1px 6px; border-radius: 3px; letter-spacing: 1px;
+    background: #00cfff; color: #003087;
+    font-size: 12px; font-weight: 900;
+    padding: 2px 10px; border-radius: 4px; letter-spacing: 1px;
   }
   .btn-admin {
     background: rgba(255,255,255,0.15);
@@ -442,11 +442,10 @@
     <div class="logo">
       <img class="logo-img" src="buddylogo.png" alt="バディ世田谷" onerror="this.style.display='none'" />
       <div>
-        <div class="logo-text">バディ世田谷</div>
-        <div class="logo-sub">REFEREE MANAGEMENT</div>
+        <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver02</span>
+          <span class="badge-ver">ver03</span>
         </div>
       </div>
     </div>
@@ -978,7 +977,7 @@ function renderMembers() {
   const container = document.getElementById('memberList');
   const search    = (document.getElementById('searchInput')?.value||'').toLowerCase();
   const filterLic = document.getElementById('filterLicense')?.value||'';
-  const list = state.members.filter(m => {
+  const list = [...state.members].sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja')).filter(m => {
     if (search && !(m.name||'').toLowerCase().includes(search)) return false;
     if (filterLic && m.license!==filterLic) return false;
     return true;
