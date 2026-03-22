@@ -536,11 +536,7 @@
         <option value="女子2級">女子2級</option>
         <option value="なし">なし</option>
       </select>
-      <select id="filterActive" onchange="renderMembers()" style="width:auto; min-width:100px;">
-        <option value="">全ステータス</option>
-        <option value="true">参加可能</option>
-        <option value="false">不参加</option>
-      </select>
+
     </div>
     <div id="memberList">
       <div class="loading"><div class="spinner"></div>読み込み中...</div>
@@ -604,20 +600,6 @@
       <input type="text" id="eventCategory" placeholder="例: U12, 一般" />
     </div>
     <div class="form-group">
-      <label>主審アサイン</label>
-      <select id="eventRef1"><option value="">未定</option></select>
-    </div>
-    <div class="row">
-      <div class="form-group">
-        <label>副審1</label>
-        <select id="eventRef2"><option value="">未定</option></select>
-      </div>
-      <div class="form-group">
-        <label>副審2</label>
-        <select id="eventRef3"><option value="">未定</option></select>
-      </div>
-    </div>
-    <div class="form-group">
       <label>資料リンク</label>
       <input type="url" id="eventFileUrl" placeholder="Google DriveのURL" />
     </div>
@@ -640,58 +622,22 @@
   <div class="modal">
     <div class="modal-title" id="memberModalTitle">審判登録</div>
     <input type="hidden" id="memberId" />
-    <div class="row">
-      <div class="form-group">
-        <label>氏名</label>
-        <input type="text" id="memberName" placeholder="例: 山田 太郎" />
-      </div>
-      <div class="form-group">
-        <label>フリガナ</label>
-        <input type="text" id="memberKana" placeholder="ヤマダ タロウ" />
-      </div>
-    </div>
-    <div class="row">
-      <div class="form-group">
-        <label>電話番号</label>
-        <input type="tel" id="memberPhone" placeholder="090-0000-0000" />
-      </div>
-      <div class="form-group">
-        <label>メール</label>
-        <input type="email" id="memberEmail" placeholder="example@mail.com" />
-      </div>
-    </div>
-    <div class="row">
-      <div class="form-group">
-        <label>保有ライセンス級</label>
-        <select id="memberLicense">
-          <option value="">選択してください</option>
-          <option value="1級">1級</option>
-          <option value="2級">2級</option>
-          <option value="3級">3級</option>
-          <option value="4級">4級</option>
-          <option value="女子1級">女子1級</option>
-          <option value="女子2級">女子2級</option>
-          <option value="なし">なし</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>ライセンス有効期限</label>
-        <input type="date" id="memberExpiry" />
-      </div>
+    <div class="form-group">
+      <label>氏名</label>
+      <input type="text" id="memberName" placeholder="例: 山田 太郎" />
     </div>
     <div class="form-group">
-      <label>担当可能カテゴリ</label>
-      <input type="text" id="memberCategory" placeholder="例: U12, U15, 一般" />
-    </div>
-    <div class="form-group">
-      <label>参加可否</label>
-      <div class="toggle-row">
-        <span>参加可能</span>
-        <label class="toggle">
-          <input type="checkbox" id="memberActive" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
+      <label>保有ライセンス級</label>
+      <select id="memberLicense">
+        <option value="">選択してください</option>
+        <option value="1級">1級</option>
+        <option value="2級">2級</option>
+        <option value="3級">3級</option>
+        <option value="4級">4級</option>
+        <option value="女子1級">女子1級</option>
+        <option value="女子2級">女子2級</option>
+        <option value="なし">なし</option>
+      </select>
     </div>
     <div class="form-group">
       <label>更新料請求要否</label>
@@ -810,8 +756,8 @@ function getOrCreateSheet(name) {
   if (!sh) {
     sh = SS.insertSheet(name);
     const headers = {
-      matches:    ['id','date','type','title','location','time','category','ref1','ref2','ref3','fileUrl','note'],
-      referees:   ['id','name','kana','phone','email','license','expiry','category','active','billing','note'],
+      matches:    ['id','date','type','title','location','time','category','fileUrl','note'],
+      referees:   ['id','name','license','billing','note'],
       attendance: ['eventId','memberId','status','comment'],
     };
     const headerRow = headers[name] || ['id'];
@@ -825,7 +771,7 @@ function saveEvent(data) {
   const sh = getOrCreateSheet('matches');
   const rows = sh.getDataRange().getValues();
   const id = data.id || new Date().getTime().toString();
-  const row = [id, data.date, data.type, data.title, data.location, data.time, data.category, data.ref1||'', data.ref2||'', data.ref3||'', data.fileUrl||'', data.note||''];
+  const row = [id, data.date, data.type, data.title, data.location, data.time, data.category, data.fileUrl||'', data.note||''];
   const existing = rows.slice(1).findIndex(r => r[0] == id);
   if (existing >= 0) sh.getRange(existing+2,1,1,row.length).setValues([row]);
   else sh.appendRow(row);
@@ -836,7 +782,7 @@ function saveMember(data) {
   const sh = getOrCreateSheet('referees');
   const rows = sh.getDataRange().getValues();
   const id = data.id || new Date().getTime().toString();
-  const row = [id, data.name, data.kana||'', data.phone||'', data.email||'', data.license||'', data.expiry||'', data.category||'', data.active, data.billing, data.note||''];
+  const row = [id, data.name, data.license||'', data.billing, data.note||''];
   const existing = rows.slice(1).findIndex(r => r[0] == id);
   if (existing >= 0) sh.getRange(existing+2,1,1,row.length).setValues([row]);
   else sh.appendRow(row);
@@ -1004,10 +950,6 @@ function renderEvents() {
     const att = getAttSummary(ev.id);
     const id  = ev.id;
 
-    const ref1name = refName(ev.ref1);
-    const ref2name = refName(ev.ref2);
-    const ref3name = refName(ev.ref3);
-
     return `
     <div class="event-item" id="evitem-${id}">
       <div class="event-header" onclick="toggleEvent('${id}')" style="cursor:pointer;display:flex;align-items:center;gap:12px;">
@@ -1021,9 +963,7 @@ function renderEvents() {
           <div class="event-meta">${ev.location || '会場未定'}${ev.time ? ' / ' + ev.time : ''}${ev.category ? ' / ' + ev.category : ''}</div>
           <div style="margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span class="event-type-badge ${TYPE_CLASSES[ev.type] || 'badge-training'}">${TYPE_LABELS[ev.type] || ev.type}</span>
-            <span style="font-size:11px;color:var(--grey);">
-              ${ref1name ? '主審: ' + ref1name : '審判未割当'}
-            </span>
+
           </div>
         </div>
         <div style="color:var(--grey);font-size:20px;padding-right:4px;transition:transform 0.2s;" class="chevron-${id}">›</div>
@@ -1034,25 +974,6 @@ function renderEvents() {
         ${ev.category   ? `<div class="event-detail-row"><span class="event-detail-label">カテゴリ</span><span class="event-detail-value">${ev.category}</span></div>` : ''}
         ${ev.fileUrl    ? `<div class="event-detail-row"><span class="event-detail-label">資料</span><span class="event-detail-value"><a href="${ev.fileUrl}" target="_blank" rel="noopener">Google Drive で開く</a></span></div>` : ''}
         ${ev.note       ? `<div class="event-detail-row"><span class="event-detail-label">メモ</span><span class="event-detail-value">${ev.note}</span></div>` : ''}
-
-        <div class="assign-section">
-          <div class="assign-title">審判アサイン</div>
-          <div class="assign-row">
-            <span class="assign-role">主審</span>
-            <span class="assign-name ${ref1name ? '' : 'empty'}">${ref1name || '未割当'}</span>
-            ${ref1name ? `<span class="assign-chip">🏅 ${refLicense(ev.ref1)}</span>` : ''}
-          </div>
-          <div class="assign-row">
-            <span class="assign-role">副審 1</span>
-            <span class="assign-name ${ref2name ? '' : 'empty'}">${ref2name || '未割当'}</span>
-            ${ref2name ? `<span class="assign-chip">🏅 ${refLicense(ev.ref2)}</span>` : ''}
-          </div>
-          <div class="assign-row">
-            <span class="assign-role">副審 2</span>
-            <span class="assign-name ${ref3name ? '' : 'empty'}">${ref3name || '未割当'}</span>
-            ${ref3name ? `<span class="assign-chip">🏅 ${refLicense(ev.ref3)}</span>` : ''}
-          </div>
-        </div>
 
         <div class="assign-section" style="margin-top:14px;">
           <div class="assign-title">稼働記録</div>
@@ -1159,13 +1080,7 @@ async function saveComment(eventId, memberId, comment) {
 // =====================================================
 // EVENT MODAL
 // =====================================================
-function fillRefereeSelects() {
-  const opts = '<option value="">未定</option>' +
-    state.members.map(m => `<option value="${m.id}">${m.name}${m.license ? '（' + m.license + '）' : ''}</option>`).join('');
-  ['eventRef1','eventRef2','eventRef3'].forEach(id => {
-    document.getElementById(id).innerHTML = opts;
-  });
-}
+function fillRefereeSelects() { /* アサイン機能削除済み */ }
 
 function openEventModal(id) {
   state.editingEventId = id || null;
@@ -1200,9 +1115,6 @@ async function saveEvent() {
     location: document.getElementById('eventLocation').value,
     time:     document.getElementById('eventTime').value,
     category: document.getElementById('eventCategory').value,
-    ref1:     document.getElementById('eventRef1').value,
-    ref2:     document.getElementById('eventRef2').value,
-    ref3:     document.getElementById('eventRef3').value,
     fileUrl:  document.getElementById('eventFileUrl').value,
     note:     document.getElementById('eventNote').value,
   };
@@ -1237,12 +1149,12 @@ function renderMembers() {
   const container = document.getElementById('memberList');
   const search     = (document.getElementById('searchInput')?.value || '').toLowerCase();
   const filterLic  = document.getElementById('filterLicense')?.value || '';
-  const filterAct  = document.getElementById('filterActive')?.value || '';
+
 
   let list = state.members.filter(m => {
     if (search && !(m.name || '').toLowerCase().includes(search)) return false;
     if (filterLic && m.license !== filterLic) return false;
-    if (filterAct !== '' && String(m.active) !== filterAct) return false;
+
     return true;
   });
 
@@ -1255,13 +1167,10 @@ function renderMembers() {
     <div class="member-item">
       <div style="flex:1; min-width:0;">
         <div class="member-name">${m.name}${m.kana ? `<span style="font-size:11px;color:var(--grey);font-weight:400;margin-left:8px;">${m.kana}</span>` : ''}</div>
-        <div class="member-meta">${m.phone || '電話未登録'}${m.email ? ' / ' + m.email : ''}</div>
+
         <div class="member-tags">
-          ${m.license  ? `<span class="tag tag-license">🏅 ${m.license}</span>` : ''}
-          ${m.expiry   ? `<span style="font-size:10px;color:var(--grey);">期限: ${m.expiry}</span>` : ''}
-          <span class="tag ${m.active ? 'tag-active' : 'tag-inactive'}">${m.active ? '✅ 参加可' : '❌ 不参加'}</span>
-          ${m.billing  ? `<span class="tag tag-billing">💰 更新料請求</span>` : ''}
-          ${m.category ? `<span style="font-size:10px;color:var(--grey);">${m.category}</span>` : ''}
+          ${m.license ? `<span class="tag tag-license">🏅 ${m.license}</span>` : ''}
+          ${m.billing ? `<span class="tag tag-billing">💰 更新料請求</span>` : ''}
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="openMemberModal('${m.id}')">✏</button>
@@ -1274,13 +1183,7 @@ function openMemberModal(id) {
   document.getElementById('memberModalTitle').textContent = m ? '審判編集' : '審判登録';
   document.getElementById('memberId').value        = m ? m.id       : '';
   document.getElementById('memberName').value      = m ? m.name     : '';
-  document.getElementById('memberKana').value      = m ? m.kana     : '';
-  document.getElementById('memberPhone').value     = m ? m.phone    : '';
-  document.getElementById('memberEmail').value     = m ? m.email    : '';
   document.getElementById('memberLicense').value   = m ? m.license  : '';
-  document.getElementById('memberExpiry').value    = m ? m.expiry   : '';
-  document.getElementById('memberCategory').value  = m ? m.category : '';
-  document.getElementById('memberActive').checked  = m ? !!m.active : true;
   document.getElementById('memberBilling').checked = m ? !!m.billing : false;
   document.getElementById('memberNote').value      = m ? m.note     : '';
   document.getElementById('deleteMemberBtn').style.display = m ? 'block' : 'none';
@@ -1294,13 +1197,7 @@ async function saveMember() {
     action:   'saveMember',
     id:       document.getElementById('memberId').value || new Date().getTime().toString(),
     name:     document.getElementById('memberName').value,
-    kana:     document.getElementById('memberKana').value,
-    phone:    document.getElementById('memberPhone').value,
-    email:    document.getElementById('memberEmail').value,
     license:  document.getElementById('memberLicense').value,
-    expiry:   document.getElementById('memberExpiry').value,
-    category: document.getElementById('memberCategory').value,
-    active:   document.getElementById('memberActive').checked,
     billing:  document.getElementById('memberBilling').checked,
     note:     document.getElementById('memberNote').value,
   };
