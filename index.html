@@ -475,7 +475,7 @@
       <div>
         <div class="logo-text">バディ世田谷</div>
         <div class="logo-sub">REFEREE MANAGEMENT</div>
-        <div class="logo-badge">41TH</div>
+        <div class="logo-badge">41TH</div><div style="font-size:9px;color:var(--grey);letter-spacing:1px;margin-top:2px;">ver01</div>
       </div>
     </div>
     <div class="header-actions">
@@ -1093,9 +1093,6 @@ function openEventModal(id) {
   document.getElementById('eventLocation').value = ev ? ev.location   : '';
   document.getElementById('eventTime').value     = ev ? ev.time       : '';
   document.getElementById('eventCategory').value = ev ? ev.category   : '';
-  document.getElementById('eventRef1').value     = ev ? (ev.ref1||'') : '';
-  document.getElementById('eventRef2').value     = ev ? (ev.ref2||'') : '';
-  document.getElementById('eventRef3').value     = ev ? (ev.ref3||'') : '';
   document.getElementById('eventFileUrl').value  = ev ? ev.fileUrl    : '';
   document.getElementById('eventNote').value     = ev ? ev.note       : '';
   document.getElementById('deleteEventBtn').style.display = ev ? 'block' : 'none';
