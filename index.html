@@ -431,6 +431,25 @@
     .logo-text { font-size: 13px; }
     .logo-img  { width: 44px; height: 44px; }
   }
+
+  /* DEBUG PANEL */
+  #debugPanel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.85); color: #00ff88;
+    font-family: monospace; font-size: 11px;
+    padding: 8px 12px; z-index: 9999;
+    max-height: 180px; overflow-y: auto;
+    display: none;
+  }
+  #debugPanel.show { display: block; }
+  #debugToggle {
+    position: fixed; bottom: 8px; right: 8px;
+    background: #003087; color: #fff;
+    border: none; border-radius: 4px;
+    font-size: 10px; font-weight: 700;
+    padding: 4px 8px; cursor: pointer;
+    z-index: 10000; opacity: 0.6;
+  }
 </style>
 </head>
 <body>
@@ -742,37 +761,70 @@ function init() {
 }
 
 // ===== API =====
+function dbg(msg) {
+  const el = document.getElementById('debugPanel');
+  if (!el) return;
+  const t = new Date().toLocaleTimeString('ja-JP');
+  el.innerHTML += '<div>[' + t + '] ' + msg + '</div>';
+  el.scrollTop = el.scrollHeight;
+  console.log('[DEBUG]', msg);
+}
+function toggleDebug() {
+  const el = document.getElementById('debugPanel');
+  el.classList.toggle('show');
+}
+
 async function gasRequest(body) {
+  dbg('gasRequest開始: action=' + body.action);
   const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
   try {
+    dbg('POST送信中...');
     const res = await Promise.race([
       fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) }),
       timeout
     ]);
-    return await res.json();
+    dbg('レスポンス受信: status=' + res.status);
+    const json = await res.json();
+    dbg('JSON解析完了: keys=' + Object.keys(json).join(','));
+    return json;
   } catch(e) {
+    dbg('POST失敗: ' + e.message + ' → GETにフォールバック');
     try {
       const res = await Promise.race([
         fetch(GAS_URL + '?action=' + body.action),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
       ]);
-      return await res.json();
-    } catch(e2) { return null; }
+      dbg('GETレスポンス: status=' + res.status);
+      const json = await res.json();
+      dbg('GET JSON解析完了');
+      return json;
+    } catch(e2) {
+      dbg('GET失敗: ' + e2.message);
+      return null;
+    }
   }
 }
 
 async function loadData() {
+  dbg('loadData開始');
   showToast('読み込み中...');
   let data = null;
-  try { data = await gasRequest({ action:'getAll' }); } catch(e) {}
+  try {
+    data = await gasRequest({ action:'getAll' });
+    dbg('getAll結果: ' + (data ? 'OK' : 'null'));
+  } catch(e) {
+    dbg('loadData例外: ' + e.message);
+  }
   state.events     = (data && Array.isArray(data.events))     ? data.events     : [];
   state.members    = (data && Array.isArray(data.members))    ? data.members    : [];
   state.attendance = (data && Array.isArray(data.attendance)) ? data.attendance : [];
-  try { renderStats(); } catch(e) {}
-  try { renderMonthFilter(); } catch(e) {}
-  try { renderEvents(); } catch(e) { document.getElementById('eventList').innerHTML = '<div class="empty-state"><p>表示エラー。再読み込みしてください。</p></div>'; }
-  try { renderMembers(); } catch(e) { document.getElementById('memberList').innerHTML = '<div class="empty-state"><p>表示エラー。再読み込みしてください。</p></div>'; }
+  dbg('state設定完了: events=' + state.events.length + ' members=' + state.members.length + ' attendance=' + state.attendance.length);
+  try { renderStats();       dbg('renderStats完了'); } catch(e) { dbg('renderStats失敗: '+e.message); }
+  try { renderMonthFilter(); dbg('renderMonthFilter完了'); } catch(e) { dbg('renderMonthFilter失敗: '+e.message); }
+  try { renderEvents();      dbg('renderEvents完了'); } catch(e) { dbg('renderEvents失敗: '+e.message); document.getElementById('eventList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
+  try { renderMembers();     dbg('renderMembers完了'); } catch(e) { dbg('renderMembers失敗: '+e.message); document.getElementById('memberList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
   showToast(data ? '更新しました' : '通信できませんでした');
+  dbg('loadData完了');
 }
 
 // ===== TABS =====
@@ -1091,5 +1143,8 @@ document.querySelectorAll('.overlay').forEach(ov => {
 
 init();
 </script>
+
+<div id="debugPanel"></div>
+<button id="debugToggle" onclick="toggleDebug()">DEBUG</button>
 </body>
 </html>
