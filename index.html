@@ -1084,7 +1084,6 @@ function fillRefereeSelects() { /* アサイン機能削除済み */ }
 
 function openEventModal(id) {
   state.editingEventId = id || null;
-  fillRefereeSelects();
   const ev = id ? state.events.find(e => e.id == id) : null;
   document.getElementById('eventModalTitle').textContent = ev ? '試合編集' : '試合追加';
   document.getElementById('eventId').value       = ev ? ev.id         : '';
