@@ -493,7 +493,7 @@
       </div>
     </div>
     <div id="monthFilter" style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;"></div>
-    <div id="eventList"><div class="loading"><div class="spinner"></div>読み込み中...</div></div>
+    <div id="eventList"></div>
   </section>
 
   <!-- 審判一覧 -->
@@ -512,7 +512,7 @@
         <option value="なし">なし</option>
       </select>
     </div>
-    <div id="memberList"><div class="loading"><div class="spinner"></div>読み込み中...</div></div>
+    <div id="memberList"></div>
   </section>
 
   <!-- CONFIG -->
@@ -755,9 +755,14 @@ let state = { events:[], members:[], attendance:[], selectedMonth: null };
 // ===== INIT =====
 function init() {
   document.getElementById('gasCodeText').value = GAS_CODE;
-  // デフォルト選択を当月にする
   state.selectedMonth = new Date().toISOString().slice(0,7);
-  loadData();
+  // まず空の状態で画面を描画してからGAS通信
+  renderStats();
+  renderMonthFilter();
+  renderEvents();
+  renderMembers();
+  // 少し遅らせてからGAS通信（DOMが確実に描画された後）
+  setTimeout(loadData, 100);
 }
 
 // ===== API =====
