@@ -462,7 +462,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver06</span>
+          <span class="badge-ver">ver07</span>
         </div>
       </div>
     </div>
@@ -940,43 +940,48 @@ function getAttSummary(eventId) {
 
 function renderAttGrid(eventId) {
   if (!state.members.length) return '<div style="font-size:12px;color:var(--text-sub);padding:8px 0;">審判が登録されていません</div>';
-  const ev         = state.events.find(e => e.id == eventId);
-  const isOfficial = ev && ev.type === 'official';
-
-  const rows = state.members.map(m => {
-    const hasLicense = m.license && m.license !== 'なし' && m.license !== '';
-    const disabled   = isOfficial && !hasLicense;
-    const att        = disabled ? null : state.attendance.find(a => a.eventId == eventId && a.memberId == m.id);
-    const status     = att ? att.status : 'pnd';
-    const comment    = att ? (att.comment||'') : '';
-    const rc         = disabled ? '' : status==='ok'?'row-ok':status==='ng'?'row-ng':'';
-    const rowStyle   = disabled ? 'opacity:0.38;background:#f5f5f8;' : '';
-    const dis        = disabled ? 'disabled' : '';
-    const nameTag    = m.license
+  var ev = state.events.find(function(e) { return e.id == eventId; });
+  var isOfficial = ev && ev.type === 'official';
+  var html = '';
+  if (isOfficial) {
+    html += '<div style="font-size:11px;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:6px;padding:6px 10px;margin-bottom:8px;">公式戦のため審判資格保有者のみ選択できます</div>';
+  }
+  html += '<table class="att-table"><thead><tr><th>審判名</th><th class="center">稼働</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
+  state.members.forEach(function(m) {
+    var hasLicense = m.license && m.license !== 'なし' && m.license !== '';
+    var disabled = isOfficial && !hasLicense;
+    var att = disabled ? null : state.attendance.find(function(a) { return a.eventId == eventId && a.memberId == m.id; });
+    var status = att ? att.status : 'pnd';
+    var comment = att ? (att.comment || '') : '';
+    var safeComment = comment.replace(/"/g, '&quot;');
+    var rowStyle = disabled ? ' style="opacity:0.38;background:#f5f5f8;"' : '';
+    var rowClass = disabled ? '' : (status === 'ok' ? 'row-ok' : status === 'ng' ? 'row-ng' : '');
+    var licTag = m.license
       ? '<span style="font-size:10px;color:var(--text-sub);margin-left:6px;">' + m.license + '</span>'
       : '<span style="font-size:10px;color:var(--red);margin-left:6px;">資格なし</span>';
-    const disNote    = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:6px;">公式戦不可</span>' : '';
-    const ok  = disabled ? '' : "onclick="setAttUI('" + eventId + "','" + m.id + "','ok')"";
-    const ng  = disabled ? '' : "onclick="setAttUI('" + eventId + "','" + m.id + "','ng')"";
-    const pnd = disabled ? '' : "onclick="setAttUI('" + eventId + "','" + m.id + "','pnd')"";
-    return '<tr class="' + rc + '" style="' + rowStyle + '">'
-      + '<td class="name">' + m.name + nameTag + disNote + '</td>'
-      + '<td class="center"><button class="att-btn ' + (!disabled&&status==='ok'?'selected-ok':'') + '" ' + ok  + ' ' + dis + ' style="' + (disabled?'cursor:not-allowed':'') + '">○</button></td>'
-      + '<td class="center"><button class="att-btn ' + (!disabled&&status==='ng'?'selected-ng':'') + '" ' + ng  + ' ' + dis + ' style="' + (disabled?'cursor:not-allowed':'') + '">×</button></td>'
-      + '<td class="center"><button class="att-btn ' + (!disabled&&status==='pnd'?'selected-pnd':'') + '" ' + pnd + ' ' + dis + ' style="' + (disabled?'cursor:not-allowed':'') + '">?</button></td>'
-      + '<td><input type="text" class="comment-input" placeholder="' + (disabled?'公式戦のため対象外':'コメント...') + '" value="' + (disabled?'':comment.replace(/"/g,'&quot;')) + '" ' + dis + ' onchange="saveComment('' + eventId + '','' + m.id + '',this.value)" onclick="event.stopPropagation()"/></td>'
-      + '</tr>';
-  }).join('');
-
-  const notice = isOfficial
-    ? '<div style="font-size:11px;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:6px;padding:6px 10px;margin-bottom:8px;"> 公式戦のため審判資格保有者のみ選択できます</div>'
-    : '';
-
-  return notice + '<table class="att-table"><thead><tr>'
-    + '<th>審判名</th>'
-    + '<th class="center">稼働</th><th class="center">欠席</th><th class="center">未定</th>'
-    + '<th>コメント</th>'
-    + '</tr></thead><tbody>' + rows + '</tbody></table>';
+    var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:6px;">公式戦不可</span>' : '';
+    html += '<tr class="' + rowClass + '"' + rowStyle + '>';
+    html += '<td class="name">' + m.name + licTag + disTag + '</td>';
+    var eid = String(eventId);
+    var mid = String(m.id);
+    var btns = ['ok','ng','pnd'];
+    btns.forEach(function(s) {
+      var label = s === 'ok' ? '○' : s === 'ng' ? '×' : '?';
+      var sel = (!disabled && status === s) ? ' selected-' + s : '';
+      if (disabled) {
+        html += '<td class="center"><button class="att-btn' + sel + '" disabled style="cursor:not-allowed">' + label + '</button></td>';
+      } else {
+        html += '<td class="center"><button class="att-btn' + sel + '" onclick="setAttUI(' + "'" + eid + "','" + mid + "','" + s + "'" + ')">' + label + '</button></td>';
+      }
+    });
+    var ph = disabled ? '公式戦のため対象外' : 'コメント...';
+    var val = disabled ? '' : safeComment;
+    var disAttr = disabled ? ' disabled' : '';
+    html += '<td><input type="text" class="comment-input" placeholder="' + ph + '" value="' + val + '"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" onclick="event.stopPropagation()"/></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
 }
 
 async function setAttUI(eventId, memberId, status) {
