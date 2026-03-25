@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver17</span>
+          <span class="badge-ver">ver18</span>
         </div>
       </div>
     </div>
@@ -949,6 +949,13 @@ function renderEvents() {
         <span class="chevron">›</span>
       </div>
       <div class="event-detail">
+        <div class="event-footer" style="margin-top:0;padding-top:0;border-top:none;margin-bottom:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="toggleEvent('${ev.id}')">閉じる</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="copyEventLink('${ev.id}')">リンクコピー</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEventModal('${ev.id}')">編集</button>
+          </div>
+        </div>
         ${ev.location?`<div class="detail-row"><span class="detail-label">会場</span><span class="detail-value">${ev.location}</span></div>`:''}
         ${ev.time    ?`<div class="detail-row"><span class="detail-label">時間</span><span class="detail-value">${ev.time}</span></div>`:''}
         ${ev.category?`<div class="detail-row"><span class="detail-label">カテゴリ</span><span class="detail-value">${ev.category}</span></div>`:''}
@@ -963,14 +970,6 @@ function renderEvents() {
             <span class="att-count pnd">未回答 ${att.pnd}人</span>
           </div>
           <div id="attgrid-${ev.id}">${renderAttGrid(ev.id)}</div>
-        </div>
-
-        <div class="event-footer">
-          <button class="btn btn-ghost btn-sm" onclick="toggleEvent('${ev.id}')">閉じる</button>
-          <div style="display:flex;gap:6px;">
-            <button class="btn btn-ghost btn-sm" onclick="copyEventLink('${ev.id}')">リンクコピー</button>
-            <button class="btn btn-ghost btn-sm" onclick="openEventModal('${ev.id}')">編集</button>
-          </div>
         </div>
       </div>
     </div>`;
