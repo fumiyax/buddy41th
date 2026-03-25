@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver21</span>
+          <span class="badge-ver">ver22</span>
         </div>
       </div>
     </div>
@@ -530,10 +530,6 @@
   <!-- 公式戦実績 -->
   <section class="section" id="section-history">
     <div class="toolbar">
-      <span class="toolbar-title">公式戦 審判実績</span>
-    </div>
-    <div id="historySummary"></div>
-    <div style="margin-top:16px;">
       <span class="toolbar-title">公式戦一覧</span>
     </div>
     <div id="historyList" style="margin-top:10px;"></div>
@@ -1090,6 +1086,7 @@ async function setAttUI(eventId, memberId, status) {
   if (el) el.innerHTML = `<span class="att-count ok">参加 ${sum.ok}人</span><span class="att-count ng">欠席 ${sum.ng}人</span><span class="att-count pnd">未回答 ${sum.pnd}人</span>`;
   const item = document.getElementById('evitem-' + eventId);
   if (item) { const mini = item.querySelector('.att-mini'); if(mini) mini.innerHTML=`<span class="ok">○${sum.ok}</span> <span class="ng">×${sum.ng}</span> ?${sum.pnd}`; }
+  try { renderHistory(); } catch(e) {}
   gasRequest({ action:'setAttendance', eventId, memberId, status });
 }
 
@@ -1237,32 +1234,12 @@ async function deleteMember() {
 // ===== HISTORY =====
 function renderHistory() {
   const officialEvents = state.events.filter(e => e.type === 'official').sort((a,b) => a.date > b.date ? -1 : 1);
-  const summaryEl = document.getElementById('historySummary');
   const listEl = document.getElementById('historyList');
 
-  // 審判別担当回数を集計
-  const counts = {};
-  state.members.forEach(m => { counts[m.id] = { name: m.name, count: 0 }; });
-  officialEvents.forEach(ev => {
-    state.attendance.filter(a => a.eventId == ev.id && a.status === 'ok').forEach(a => {
-      if (counts[a.memberId]) counts[a.memberId].count++;
-    });
-  });
-  const sorted = Object.values(counts).sort((a,b) => b.count - a.count);
-
   if (!officialEvents.length) {
-    summaryEl.innerHTML = '';
     listEl.innerHTML = '<div class="empty-state"><p>公式戦のデータがありません</p></div>';
     return;
   }
-
-  // サマリー: 審判別担当回数
-  summaryEl.innerHTML = '<div class="stats-row" style="grid-template-columns:repeat(auto-fill,minmax(100px,1fr));">' +
-    sorted.filter(s => s.count > 0).map(s =>
-      '<div class="stat-box"><div class="stat-num">' + s.count + '</div><div class="stat-label">' + s.name + '</div></div>'
-    ).join('') + '</div>';
-
-  // 公式戦一覧
   listEl.innerHTML = officialEvents.map(ev => {
     const d = new Date(ev.date);
     const wd = d.getDay();
