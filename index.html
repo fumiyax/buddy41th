@@ -234,9 +234,11 @@
     background: var(--bg);
   }
   .att-table th.center { text-align: center; }
-  .att-table td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .att-table td.name   { font-weight: 700; }
-  .att-table td.center { text-align: center; }
+  .att-table td { padding: 6px 4px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .att-table td.name   { font-weight: 700; white-space: nowrap; }
+  .att-table td.name .att-name-text { display: inline-block; width: 4em; }
+  .att-table td.center { text-align: center; width: 44px; }
+  .att-table td.comment-cell { width: auto; }
   .att-table tr:last-child td { border-bottom: none; }
   .att-table tr.row-ok { background: rgba(10,138,74,0.04); }
   .att-table tr.row-ng { background: rgba(192,57,43,0.04); }
@@ -471,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver15</span>
+          <span class="badge-ver">ver16</span>
         </div>
       </div>
     </div>
@@ -1004,14 +1006,15 @@ function renderAttGrid(eventId) {
     var rowStyle = disabled ? ' style="opacity:0.38;background:#f5f5f8;"' : '';
     var rowClass = disabled ? '' : (status === 'ok' ? 'row-ok' : status === 'ng' ? 'row-ng' : '');
     var teamTag = '';
-    if (m.team === 'A') teamTag = '<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;margin-left:6px;">A</span>';
-    else if (m.team === 'B') teamTag = '<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;margin-left:6px;">B</span>';
+    if (m.team === 'A') teamTag = '<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;margin-left:4px;">A</span>';
+    else if (m.team === 'B') teamTag = '<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;margin-left:4px;">B</span>';
+    else teamTag = '<span class="tag tag-team" style="border:1px solid transparent;margin-left:4px;"></span>';
     var licTag = m.license
-      ? '<span class="tag tag-license ' + licClass(m.license) + '" style="margin-left:4px;">' + m.license + '</span>'
-      : '<span class="tag tag-license tag-lic-none" style="margin-left:4px;">なし</span>';
-    var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:4px;">公式戦不可</span>' : '';
+      ? '<span class="tag tag-license ' + licClass(m.license) + '" style="margin-left:2px;">' + m.license + '</span>'
+      : '<span class="tag tag-license tag-lic-none" style="margin-left:2px;">なし</span>';
+    var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:2px;">不可</span>' : '';
     html += '<tr class="' + rowClass + '"' + rowStyle + '>';
-    html += '<td class="name">' + m.name + teamTag + licTag + disTag + '</td>';
+    html += '<td class="name"><span class="att-name-text">' + m.name + '</span>' + teamTag + licTag + disTag + '</td>';
     var eid = String(eventId);
     var mid = String(m.id);
     var btns = ['ok','ng','pnd'];
@@ -1027,7 +1030,7 @@ function renderAttGrid(eventId) {
     var ph = disabled ? '公式戦のため対象外' : 'コメント...';
     var val = disabled ? '' : safeComment;
     var disAttr = disabled ? ' disabled' : '';
-    html += '<td><input type="text" class="comment-input" placeholder="' + ph + '" value="' + val + '"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" onclick="event.stopPropagation()"/></td>';
+    html += '<td class="comment-cell"><input type="text" class="comment-input" placeholder="' + ph + '" value="' + val + '"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" onclick="event.stopPropagation()"/></td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
