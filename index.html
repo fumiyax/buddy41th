@@ -462,7 +462,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver09</span>
+          <span class="badge-ver">ver10</span>
         </div>
       </div>
     </div>
@@ -932,7 +932,7 @@ function renderEvents() {
         <div class="att-section">
           <div class="att-section-title"> 審判 出欠確認</div>
           <div class="att-summary" id="att-summary-${ev.id}">
-            <span class="att-count ok">稼働 ${att.ok}人</span>
+            <span class="att-count ok">参加 ${att.ok}人</span>
             <span class="att-count ng">欠席 ${att.ng}人</span>
             <span class="att-count pnd">未回答 ${att.pnd}人</span>
           </div>
@@ -968,7 +968,7 @@ function renderAttGrid(eventId) {
   if (isOfficial) {
     html += '<div style="font-size:11px;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:6px;padding:6px 10px;margin-bottom:8px;">公式戦のため審判資格保有者のみ選択できます</div>';
   }
-  html += '<table class="att-table"><thead><tr><th>審判名</th><th class="center">稼働</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
+  html += '<table class="att-table"><thead><tr><th>審判名</th><th class="center">参加</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
   state.members.forEach(function(m) {
     var hasLicense = m.license && m.license !== 'なし' && m.license !== '';
     var disabled = isOfficial && !hasLicense;
@@ -1017,7 +1017,7 @@ async function setAttUI(eventId, memberId, status) {
   document.getElementById('attgrid-' + eventId).innerHTML = renderAttGrid(eventId);
   const sum = getAttSummary(eventId);
   const el  = document.getElementById('att-summary-' + eventId);
-  if (el) el.innerHTML = `<span class="att-count ok">稼働 ${sum.ok}人</span><span class="att-count ng">欠席 ${sum.ng}人</span><span class="att-count pnd">未回答 ${sum.pnd}人</span>`;
+  if (el) el.innerHTML = `<span class="att-count ok">参加 ${sum.ok}人</span><span class="att-count ng">欠席 ${sum.ng}人</span><span class="att-count pnd">未回答 ${sum.pnd}人</span>`;
   const item = document.getElementById('evitem-' + eventId);
   if (item) { const mini = item.querySelector('.att-mini'); if(mini) mini.innerHTML=`<span class="ok">○${sum.ok}</span> <span class="ng">×${sum.ng}</span> ?${sum.pnd}`; }
   gasRequest({ action:'setAttendance', eventId, memberId, status });
