@@ -471,6 +471,7 @@
   <nav>
     <div class="tab active" onclick="showTab('schedule')" id="tab-schedule">試合管理</div>
     <div class="tab" onclick="showTab('members')"  id="tab-members">審判一覧</div>
+    <div class="tab" onclick="showTab('history')"  id="tab-history">公式戦実績</div>
     <div class="tab" onclick="showTab('settings')" id="tab-settings">CONFIG</div>
   </nav>
 </header>
@@ -513,6 +514,18 @@
       </select>
     </div>
     <div id="memberList"></div>
+  </section>
+
+  <!-- 公式戦実績 -->
+  <section class="section" id="section-history">
+    <div class="toolbar">
+      <span class="toolbar-title">公式戦 審判実績</span>
+    </div>
+    <div id="historySummary"></div>
+    <div style="margin-top:16px;">
+      <span class="toolbar-title">公式戦一覧</span>
+    </div>
+    <div id="historyList" style="margin-top:10px;"></div>
   </section>
 
   <!-- CONFIG -->
@@ -604,6 +617,14 @@
         <option value="3級">3級</option><option value="4級">4級</option>
         <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
         <option value="なし">なし</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>チーム</label>
+      <select id="memberTeam">
+        <option value="">選択してください</option>
+        <option value="A">Aチーム</option>
+        <option value="B">Bチーム</option>
       </select>
     </div>
     <div class="form-group">
@@ -701,7 +722,7 @@ function getOrCreateSheet(name) {
     sh = SS.insertSheet(name);
     const headers = {
       matches:    ['id','date','type','title','location','time','category','fileUrl','note'],
-      referees:   ['id','name','license','billing','note'],
+      referees:   ['id','name','license','billing','team','note'],
       attendance: ['eventId','memberId','status','comment'],
     };
     const headerRow = headers[name] || ['id'];
@@ -723,7 +744,7 @@ function saveMember(data) {
   const sh = getOrCreateSheet('referees');
   const rows = sh.getDataRange().getValues();
   const id = data.id || new Date().getTime().toString();
-  const row = [id, data.name, data.license||'', data.billing, data.note||''];
+  const row = [id, data.name, data.license||'', data.billing, data.team||'', data.note||''];
   const existing = rows.slice(1).findIndex(r => r[0] == id);
   if (existing >= 0) sh.getRange(existing+2,1,1,row.length).setValues([row]); else sh.appendRow(row);
   return { ok: true, id };
@@ -822,6 +843,7 @@ async function loadData() {
   try { renderMonthFilter(); dbg('renderMonthFilter完了'); } catch(e) { dbg('renderMonthFilter失敗: '+e.message); }
   try { renderEvents();      dbg('renderEvents完了'); } catch(e) { dbg('renderEvents失敗: '+e.message); document.getElementById('eventList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
   try { renderMembers();     dbg('renderMembers完了'); } catch(e) { dbg('renderMembers失敗: '+e.message); document.getElementById('memberList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
+  try { renderHistory();     dbg('renderHistory完了'); } catch(e) { dbg('renderHistory失敗: '+e.message); }
   showToast(data ? '更新しました' : '通信できませんでした');
   dbg('loadData完了');
 }
@@ -956,12 +978,15 @@ function renderAttGrid(eventId) {
     var safeComment = comment.replace(/"/g, '&quot;');
     var rowStyle = disabled ? ' style="opacity:0.38;background:#f5f5f8;"' : '';
     var rowClass = disabled ? '' : (status === 'ok' ? 'row-ok' : status === 'ng' ? 'row-ng' : '');
+    var teamTag = m.team
+      ? '<span style="font-size:10px;color:#6b21a8;margin-left:6px;">' + m.team + '</span>'
+      : '';
     var licTag = m.license
       ? '<span style="font-size:10px;color:var(--text-sub);margin-left:6px;">' + m.license + '</span>'
       : '<span style="font-size:10px;color:var(--red);margin-left:6px;">資格なし</span>';
     var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:6px;">公式戦不可</span>' : '';
     html += '<tr class="' + rowClass + '"' + rowStyle + '>';
-    html += '<td class="name">' + m.name + licTag + disTag + '</td>';
+    html += '<td class="name">' + m.name + teamTag + licTag + disTag + '</td>';
     var eid = String(eventId);
     var mid = String(m.id);
     var btns = ['ok','ng','pnd'];
@@ -1078,6 +1103,7 @@ function renderMembers() {
       <div style="flex:1;min-width:0;">
         <div class="member-name">${m.name}</div>
         <div class="member-tags">
+          ${m.team   ?`<span class="tag" style="background:#f0e6ff;color:#6b21a8;border:1px solid #d0b0ff;">${m.team}チーム</span>`:''}
           ${m.license?`<span class="tag tag-license"> ${m.license}</span>`:''}
           ${m.billing?`<span class="tag tag-billing"> 更新料請求</span>`:''}
           ${m.note   ?`<span style="font-size:11px;color:var(--text-sub);">${m.note}</span>`:''}
@@ -1093,6 +1119,7 @@ function openMemberModal(id) {
   document.getElementById('memberId').value      = m ? m.id      : '';
   document.getElementById('memberName').value    = m ? m.name    : '';
   document.getElementById('memberLicense').value = m ? m.license : '';
+  document.getElementById('memberTeam').value    = m ? (m.team||'') : '';
   document.getElementById('memberBilling').checked = m ? !!m.billing : false;
   document.getElementById('memberNote').value    = m ? m.note    : '';
   document.getElementById('deleteMemberBtn').style.display = m ? 'block' : 'none';
@@ -1106,6 +1133,7 @@ async function saveMember() {
     id:      document.getElementById('memberId').value || Date.now().toString(),
     name:    document.getElementById('memberName').value,
     license: document.getElementById('memberLicense').value,
+    team:    document.getElementById('memberTeam').value,
     billing: document.getElementById('memberBilling').checked,
     note:    document.getElementById('memberNote').value,
   };
@@ -1124,6 +1152,65 @@ async function deleteMember() {
   renderMembers(); renderStats();
   closeAllModals(); showToast('削除しました');
   await gasRequest({ action:'deleteMember', id });
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  const officialEvents = state.events.filter(e => e.type === 'official').sort((a,b) => a.date > b.date ? -1 : 1);
+  const summaryEl = document.getElementById('historySummary');
+  const listEl = document.getElementById('historyList');
+
+  // 審判別担当回数を集計
+  const counts = {};
+  state.members.forEach(m => { counts[m.id] = { name: m.name, count: 0 }; });
+  officialEvents.forEach(ev => {
+    state.attendance.filter(a => a.eventId == ev.id && a.status === 'ok').forEach(a => {
+      if (counts[a.memberId]) counts[a.memberId].count++;
+    });
+  });
+  const sorted = Object.values(counts).sort((a,b) => b.count - a.count);
+
+  if (!officialEvents.length) {
+    summaryEl.innerHTML = '';
+    listEl.innerHTML = '<div class="empty-state"><p>公式戦のデータがありません</p></div>';
+    return;
+  }
+
+  // サマリー: 審判別担当回数
+  summaryEl.innerHTML = '<div class="stats-row" style="grid-template-columns:repeat(auto-fill,minmax(100px,1fr));">' +
+    sorted.filter(s => s.count > 0).map(s =>
+      '<div class="stat-box"><div class="stat-num">' + s.count + '</div><div class="stat-label">' + s.name + '</div></div>'
+    ).join('') + '</div>';
+
+  // 公式戦一覧
+  listEl.innerHTML = officialEvents.map(ev => {
+    const d = new Date(ev.date);
+    const wd = d.getDay();
+    const dc = wd===0?'sun':wd===6?'sat':'';
+    const assigned = state.attendance
+      .filter(a => a.eventId == ev.id && a.status === 'ok')
+      .map(a => { const m = state.members.find(m => m.id == a.memberId); return m ? {name: m.name, team: m.team||''} : null; })
+      .filter(a => a);
+    return '<div class="event-item">' +
+      '<div class="event-header" style="cursor:default;">' +
+        '<div class="event-date ' + dc + '">' +
+          '<div class="month">' + (d.getMonth()+1) + '月</div>' +
+          '<div class="day">' + d.getDate() + '</div>' +
+          '<div class="weekday">(' + WEEKDAYS[wd] + ')</div>' +
+        '</div>' +
+        '<div class="event-info">' +
+          '<div class="event-title">' + (ev.title||'（タイトルなし）') + '</div>' +
+          '<div class="event-meta">' + (ev.location||'') + (ev.time?' / '+ev.time:'') + '</div>' +
+          '<div class="event-badges">' +
+            '<span class="badge badge-official">公式戦</span>' +
+            (assigned.length
+              ? assigned.map(a => '<span class="badge" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);">' + a.name + (a.team ? ' ('+a.team+')' : '') + '</span>').join('')
+              : '<span style="font-size:11px;color:var(--text-sub);">担当未定</span>') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
 // ===== ADMIN =====
