@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver18</span>
+          <span class="badge-ver">ver19</span>
         </div>
       </div>
     </div>
@@ -777,6 +777,39 @@ function deleteRow(sheetName, id) {
   const idx = rows.slice(1).findIndex(r => r[0]==id);
   if (idx >= 0) sh.deleteRow(idx+2);
   return { ok: true };
+}
+// === LINE通知 ===
+const LINE_TOKEN = PropertiesService.getScriptProperties().getProperty('LINE_TOKEN');
+const LINE_GROUP_ID = PropertiesService.getScriptProperties().getProperty('LINE_GROUP_ID');
+const SITE_URL = 'https://fumiyax.github.io/buddy41th/';
+function notifyTomorrow() {
+  const sh = getOrCreateSheet('matches');
+  const rows = sh.getDataRange().getValues();
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dateStr = Utilities.formatDate(tomorrow, 'Asia/Tokyo', 'yyyy-MM-dd');
+  rows.slice(1).forEach(function(row) {
+    var rowDate = '';
+    try { rowDate = Utilities.formatDate(new Date(row[1]), 'Asia/Tokyo', 'yyyy-MM-dd'); } catch(e) { rowDate = String(row[1]); }
+    if (rowDate === dateStr) {
+      var title = row[3] || '（タイトルなし）';
+      var location = row[4] || '';
+      var time = row[5] || '';
+      var link = SITE_URL + '#event-' + row[0];
+      var msg = '【明日の試合】\\n' + title;
+      if (location) msg += '\\n会場: ' + location;
+      if (time) msg += '\\n時間: ' + time;
+      msg += '\\n\\n出欠確認はこちら↓\\n' + link;
+      sendLineMessage(msg);
+    }
+  });
+}
+function sendLineMessage(msg) {
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post',
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LINE_TOKEN},
+    payload: JSON.stringify({to: LINE_GROUP_ID, messages: [{type: 'text', text: msg}]})
+  });
 }`;
 
 // ===== STATE =====
