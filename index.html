@@ -281,7 +281,14 @@
   .member-tags { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; }
   .tag { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; padding: 2px 0; border-radius: 4px; font-weight: 700; min-width: 28px; text-align: center; }
   .tag-team { width: 24px; padding: 2px 0; }
-  .tag-license { min-width: 32px; padding: 2px 6px; background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
+  .tag-license { min-width: 32px; padding: 2px 6px; }
+  .tag-lic-1  { background: #1a2540; color: #fff; border: 1px solid #1a2540; }
+  .tag-lic-2  { background: var(--blue); color: #fff; border: 1px solid var(--blue); }
+  .tag-lic-3  { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
+  .tag-lic-4  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .tag-lic-w1 { background: #fce4ec; color: #c2185b; border: 1px solid #f48fb1; }
+  .tag-lic-w2 { background: #fce4ec; color: #c2185b; border: 1px solid #f48fb1; }
+  .tag-lic-none { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
   .tag-billing { padding: 2px 6px; background: var(--gold-bg); color: var(--gold); border: 1px solid #e0c060; }
 
   /* FILTER */
@@ -464,7 +471,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver13</span>
+          <span class="badge-ver">ver14</span>
         </div>
       </div>
     </div>
@@ -609,26 +616,29 @@
     <input type="hidden" id="memberId" />
     <div class="form-group">
       <label>氏名</label>
-      <input type="text" id="memberName" placeholder="例: 山田 太郎" />
+      <input type="text" id="memberName" placeholder="例: 山田 太郎" oninput="updateMemberPreview()" />
     </div>
-    <div class="form-group">
-      <label>保有ライセンス級</label>
-      <select id="memberLicense">
-        <option value="">選択してください</option>
-        <option value="1級">1級</option><option value="2級">2級</option>
-        <option value="3級">3級</option><option value="4級">4級</option>
-        <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
-        <option value="なし">なし</option>
-      </select>
+    <div class="row">
+      <div class="form-group">
+        <label>ライセンス</label>
+        <select id="memberLicense" onchange="updateMemberPreview()">
+          <option value="">選択</option>
+          <option value="1級">1級</option><option value="2級">2級</option>
+          <option value="3級">3級</option><option value="4級">4級</option>
+          <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
+          <option value="なし">なし</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>チーム</label>
+        <select id="memberTeam" onchange="updateMemberPreview()">
+          <option value="">選択</option>
+          <option value="A">Aチーム</option>
+          <option value="B">Bチーム</option>
+        </select>
+      </div>
     </div>
-    <div class="form-group">
-      <label>チーム</label>
-      <select id="memberTeam">
-        <option value="">選択してください</option>
-        <option value="A">Aチーム</option>
-        <option value="B">Bチーム</option>
-      </select>
-    </div>
+    <div id="memberPreview" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:14px;min-height:32px;"></div>
     <div class="form-group">
       <label>更新料請求要否</label>
       <div class="toggle-row">
@@ -774,6 +784,17 @@ const TYPE_CLASSES = { official:'badge-official', friendly:'badge-friendly' };
 const WEEKDAYS     = ['日','月','火','水','木','金','土'];
 
 let state = { events:[], members:[], attendance:[], selectedMonth: null };
+
+function licClass(license) {
+  if (!license || license === 'なし') return 'tag-lic-none';
+  if (license === '1級') return 'tag-lic-1';
+  if (license === '2級') return 'tag-lic-2';
+  if (license === '3級') return 'tag-lic-3';
+  if (license === '4級') return 'tag-lic-4';
+  if (license === '女子1級') return 'tag-lic-w1';
+  if (license === '女子2級') return 'tag-lic-w2';
+  return 'tag-lic-none';
+}
 
 // ===== INIT =====
 function init() {
@@ -1108,7 +1129,7 @@ function renderMembers() {
       <span class="member-name">${m.name}</span>
       <span class="member-tags">
         ${m.team==='A'?`<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>`:m.team==='B'?`<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>`:`<span class="tag tag-team" style="border:1px solid transparent;"></span>`}
-        ${m.license?`<span class="tag tag-license">${m.license}</span>`:`<span class="tag tag-license" style="visibility:hidden;">4級</span>`}
+        ${m.license?`<span class="tag tag-license ${licClass(m.license)}">${m.license}</span>`:`<span class="tag tag-license" style="visibility:hidden;">4級</span>`}
         ${m.billing?`<span class="tag tag-billing">請求</span>`:''}
       </span>
       <span style="margin-left:auto;color:var(--text-sub);font-size:14px;flex-shrink:0;">›</span>
@@ -1126,8 +1147,20 @@ function openMemberModal(id) {
   document.getElementById('memberNote').value    = m ? m.note    : '';
   document.getElementById('deleteMemberBtn').style.display = m ? 'block' : 'none';
   document.getElementById('memberOverlay').classList.add('show');
+  updateMemberPreview();
 }
 function closeMemberModal() { document.getElementById('memberOverlay').classList.remove('show'); }
+
+function updateMemberPreview() {
+  var name = document.getElementById('memberName').value || '名前';
+  var license = document.getElementById('memberLicense').value;
+  var team = document.getElementById('memberTeam').value;
+  var html = '<span style="font-weight:700;font-size:13px;width:5.5em;flex-shrink:0;">' + name + '</span>';
+  if (team === 'A') html += '<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>';
+  else if (team === 'B') html += '<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>';
+  if (license) html += '<span class="tag tag-license ' + licClass(license) + '">' + license + '</span>';
+  document.getElementById('memberPreview').innerHTML = html;
+}
 
 async function saveMember() {
   const data = {
