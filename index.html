@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver20</span>
+          <span class="badge-ver">ver21</span>
         </div>
       </div>
     </div>
@@ -834,7 +834,7 @@ function licClass(license) {
 // ===== INIT =====
 function init() {
   try { document.getElementById('gasCodeText').value = GAS_CODE; } catch(e) {}
-  state.selectedMonth = new Date().toISOString().slice(0,7);
+  state.selectedMonth = 'current';
   setTimeout(loadData, 200);
 }
 
@@ -932,8 +932,8 @@ function renderMonthFilter() {
   const thisM  = `${y}-${String(m+1).padStart(2,'0')}`;
   const nextM  = `${m===11?y+1:y}-${String(m===11?1:m+2).padStart(2,'0')}`;
 
-  const filters = ['past', thisM, nextM];
-  const labels = { past: '過去分', [thisM]: `今月（${m+1}月）`, [nextM]: `翌月（${m===11?1:m+2}月）` };
+  const filters = ['past', 'current', nextM];
+  const labels = { past: '過去分', current: `今月（${m+1}月）`, [nextM]: `翌月（${m===11?1:m+2}月）` };
   const container = document.getElementById('monthFilter');
   container.innerHTML = filters.map(f =>
     `<button class="month-btn ${state.selectedMonth===f?'active':''}" onclick="setMonthFilter('${f}')">${labels[f]}</button>`
@@ -949,12 +949,13 @@ function setMonthFilter(month) {
 // ===== EVENTS =====
 function renderEvents() {
   const container = document.getElementById('eventList');
-  const now = new Date();
-  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const today = new Date().toISOString().slice(0,10);
+  const thisMonth = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
   const sorted = [...state.events]
     .filter(ev => {
       if (!ev.date) return false;
-      if (state.selectedMonth === 'past') return ev.date < thisMonth;
+      if (state.selectedMonth === 'past') return ev.date < today;
+      if (state.selectedMonth === 'current') return ev.date >= today && ev.date.startsWith(thisMonth);
       return ev.date.startsWith(state.selectedMonth||'');
     })
     .sort((a,b) => state.selectedMonth === 'past' ? (a.date > b.date ? -1 : 1) : (a.date < b.date ? -1 : 1));
