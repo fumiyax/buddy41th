@@ -471,7 +471,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver14</span>
+          <span class="badge-ver">ver15</span>
         </div>
       </div>
     </div>
@@ -1003,14 +1003,13 @@ function renderAttGrid(eventId) {
     var safeComment = comment.replace(/"/g, '&quot;');
     var rowStyle = disabled ? ' style="opacity:0.38;background:#f5f5f8;"' : '';
     var rowClass = disabled ? '' : (status === 'ok' ? 'row-ok' : status === 'ng' ? 'row-ng' : '');
-    var teamColor = m.team === 'A' ? '#003087' : '#0891b2';
-    var teamTag = m.team
-      ? '<span style="font-size:10px;color:' + teamColor + ';font-weight:700;margin-left:6px;">' + m.team + '</span>'
-      : '';
+    var teamTag = '';
+    if (m.team === 'A') teamTag = '<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;margin-left:6px;">A</span>';
+    else if (m.team === 'B') teamTag = '<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;margin-left:6px;">B</span>';
     var licTag = m.license
-      ? '<span style="font-size:10px;color:var(--text-sub);margin-left:6px;">' + m.license + '</span>'
-      : '<span style="font-size:10px;color:var(--red);margin-left:6px;">資格なし</span>';
-    var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:6px;">公式戦不可</span>' : '';
+      ? '<span class="tag tag-license ' + licClass(m.license) + '" style="margin-left:4px;">' + m.license + '</span>'
+      : '<span class="tag tag-license tag-lic-none" style="margin-left:4px;">なし</span>';
+    var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:4px;">公式戦不可</span>' : '';
     html += '<tr class="' + rowClass + '"' + rowStyle + '>';
     html += '<td class="name">' + m.name + teamTag + licTag + disTag + '</td>';
     var eid = String(eventId);
