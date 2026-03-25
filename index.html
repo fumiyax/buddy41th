@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver19</span>
+          <span class="badge-ver">ver20</span>
         </div>
       </div>
     </div>
@@ -498,7 +498,7 @@
       <div class="stat-box gold-top"> <div class="stat-num" id="statMatches">—</div> <div class="stat-label">今月試合数</div></div>
     </div>
     <div class="toolbar">
-      <span class="toolbar-title">UPCOMING MATCHES</span>
+      <span class="toolbar-title">MATCHES</span>
       <div style="display:flex;gap:6px;">
         <button class="btn btn-ghost btn-sm" onclick="loadData()">更新</button>
         <button class="btn btn-primary btn-sm" onclick="openEventModal()">＋ 試合追加</button>
@@ -924,19 +924,19 @@ function renderStats() {
   document.getElementById('statMatches').textContent = state.events.filter(e => (e.date||'').startsWith(ym)).length;
 }
 
-// ===== MONTH FILTER (当月・翌月) =====
+// ===== MONTH FILTER (過去分・今月・翌月) =====
 function renderMonthFilter() {
   const now    = new Date();
   const y      = now.getFullYear();
   const m      = now.getMonth();
   const thisM  = `${y}-${String(m+1).padStart(2,'0')}`;
   const nextM  = `${m===11?y+1:y}-${String(m===11?1:m+2).padStart(2,'0')}`;
-  const months = [thisM, nextM];
 
-  const labels = { [thisM]: '今月', [nextM]: '翌月' };
+  const filters = ['past', thisM, nextM];
+  const labels = { past: '過去分', [thisM]: `今月（${m+1}月）`, [nextM]: `翌月（${m===11?1:m+2}月）` };
   const container = document.getElementById('monthFilter');
-  container.innerHTML = months.map(mo =>
-    `<button class="month-btn ${state.selectedMonth===mo?'active':''}" onclick="setMonthFilter('${mo}')">${labels[mo]}（${parseInt(mo.split('-')[1])}月）</button>`
+  container.innerHTML = filters.map(f =>
+    `<button class="month-btn ${state.selectedMonth===f?'active':''}" onclick="setMonthFilter('${f}')">${labels[f]}</button>`
   ).join('');
 }
 
@@ -949,9 +949,15 @@ function setMonthFilter(month) {
 // ===== EVENTS =====
 function renderEvents() {
   const container = document.getElementById('eventList');
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const sorted = [...state.events]
-    .filter(ev => ev.date && ev.date.startsWith(state.selectedMonth||''))
-    .sort((a,b) => a.date < b.date ? -1 : 1);
+    .filter(ev => {
+      if (!ev.date) return false;
+      if (state.selectedMonth === 'past') return ev.date < thisMonth;
+      return ev.date.startsWith(state.selectedMonth||'');
+    })
+    .sort((a,b) => state.selectedMonth === 'past' ? (a.date > b.date ? -1 : 1) : (a.date < b.date ? -1 : 1));
 
   if (!sorted.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-icon"></div><p>この月の試合がありません<br>「＋ 試合追加」で登録しましょう</p></div>`;
