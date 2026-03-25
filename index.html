@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver16</span>
+          <span class="badge-ver">ver17</span>
         </div>
       </div>
     </div>
@@ -870,6 +870,7 @@ async function loadData() {
   try { renderMembers();     dbg('renderMembers完了'); } catch(e) { dbg('renderMembers失敗: '+e.message); document.getElementById('memberList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
   try { renderHistory();     dbg('renderHistory完了'); } catch(e) { dbg('renderHistory失敗: '+e.message); }
   showToast(data ? '更新しました' : '通信できませんでした');
+  try { openEventFromHash(); } catch(e) { dbg('openEventFromHash失敗: '+e.message); }
   dbg('loadData完了');
 }
 
@@ -966,7 +967,10 @@ function renderEvents() {
 
         <div class="event-footer">
           <button class="btn btn-ghost btn-sm" onclick="toggleEvent('${ev.id}')">閉じる</button>
-          <button class="btn btn-ghost btn-sm" onclick="openEventModal('${ev.id}')">編集</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="copyEventLink('${ev.id}')">リンクコピー</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEventModal('${ev.id}')">編集</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -1248,6 +1252,33 @@ function renderHistory() {
       '</div>' +
     '</div>';
   }).join('');
+}
+
+// ===== EVENT LINK =====
+function copyEventLink(eventId) {
+  var url = location.origin + location.pathname + '#event-' + eventId;
+  navigator.clipboard.writeText(url).then(function() { showToast('リンクをコピーしました'); });
+}
+
+function openEventFromHash() {
+  var hash = location.hash;
+  if (!hash || !hash.startsWith('#event-')) return;
+  var eventId = hash.replace('#event-', '');
+  var ev = state.events.find(function(e) { return String(e.id) === eventId; });
+  if (!ev) return;
+  // 該当月に切り替え
+  if (ev.date) state.selectedMonth = ev.date.slice(0, 7);
+  showTab('schedule');
+  renderMonthFilter();
+  renderEvents();
+  // 展開してスクロール
+  setTimeout(function() {
+    var el = document.getElementById('evitem-' + eventId);
+    if (el) {
+      el.classList.add('expanded');
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
 }
 
 // ===== ADMIN =====
