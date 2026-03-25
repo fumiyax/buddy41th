@@ -271,13 +271,14 @@
 
   /* MEMBER */
   .member-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 14px; background: var(--card);
-    border: 1px solid var(--border); border-radius: 8px;
-    margin-bottom: 8px; box-shadow: var(--shadow-sm);
+    display: flex; align-items: center;
+    padding: 8px 10px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 4px; box-shadow: var(--shadow-sm);
+    gap: 8px;
   }
-  .member-name { font-weight: 700; font-size: 14px; color: var(--text); }
-  .member-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+  .member-name { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; }
+  .member-tags { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; overflow: hidden; }
   .tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; }
   .tag-license { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
   .tag-billing { background: var(--gold-bg); color: var(--gold); border: 1px solid #e0c060; }
@@ -462,7 +463,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver11</span>
+          <span class="badge-ver">ver12</span>
         </div>
       </div>
     </div>
@@ -1102,17 +1103,14 @@ function renderMembers() {
     return;
   }
   container.innerHTML = list.map(m => `
-    <div class="member-item">
-      <div style="flex:1;min-width:0;">
-        <div class="member-name">${m.name}</div>
-        <div class="member-tags">
-          ${m.team==='A'?`<span class="tag" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">${m.team}チーム</span>`:m.team==='B'?`<span class="tag" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">${m.team}チーム</span>`:''}
-          ${m.license?`<span class="tag tag-license"> ${m.license}</span>`:''}
-          ${m.billing?`<span class="tag tag-billing"> 更新料請求</span>`:''}
-          ${m.note   ?`<span style="font-size:11px;color:var(--text-sub);">${m.note}</span>`:''}
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="openMemberModal('${m.id}')"></button>
+    <div class="member-item" onclick="openMemberModal('${m.id}')" style="cursor:pointer;">
+      <span class="member-name">${m.name}</span>
+      <span class="member-tags">
+        ${m.team==='A'?`<span class="tag" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>`:m.team==='B'?`<span class="tag" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>`:''}
+        ${m.license?`<span class="tag tag-license">${m.license}</span>`:''}
+        ${m.billing?`<span class="tag tag-billing">請求</span>`:''}
+      </span>
+      <span style="margin-left:auto;color:var(--text-sub);font-size:14px;flex-shrink:0;">›</span>
     </div>`).join('');
 }
 
