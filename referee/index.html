@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>バディ世田谷審判管理</title>
+<link rel="icon" type="image/png" href="../shared/buddylogo.png" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Bebas+Neue&display=swap');
+
+  :root {
+    --blue:        #003087;
+    --blue-mid:    #0050b3;
+    --blue-light:  #1a7fe8;
+    --blue-pale:   #e8f1fb;
+    --blue-border: #b8d0f0;
+    --white:       #ffffff;
+    --bg:          #f4f7fc;
+    --text:        #1a2540;
+    --text-sub:    #5a6a8a;
+    --border:      #dde5f0;
+    --card:        #ffffff;
+    --green:       #0a8a4a;
+    --green-bg:    #e6f7ee;
+    --green-border:#99ddb8;
+    --red:         #c0392b;
+    --red-bg:      #fdf0ee;
+    --red-border:  #f0b8b0;
+    --gold:        #b8860b;
+    --gold-bg:     #fef9e7;
+    --shadow-sm:   0 1px 4px rgba(0,48,135,0.08);
+    --shadow:      0 2px 12px rgba(0,48,135,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--blue);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,48,135,0.3);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-img {
+    width: 56px; height: 56px;
+    object-fit: contain; border-radius: 50%;
+    background: #fff; padding: 2px;
+  }
+  .logo-text {
+    font-size: 15px; font-weight: 900;
+    letter-spacing: 1px; color: #fff; line-height: 1.2;
+  }
+  .logo-sub {
+    font-size: 9px; color: rgba(255,255,255,0.7);
+    letter-spacing: 2px; margin-top: 2px;
+  }
+  .logo-badges { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .badge-41 {
+    background: #ffd700; color: var(--blue);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px;
+    padding: 2px 12px; border-radius: 4px;
+  }
+  .badge-ver {
+    background: #00cfff; color: #003087;
+    font-size: 12px; font-weight: 900;
+    padding: 2px 10px; border-radius: 4px; letter-spacing: 1px;
+  }
+  .btn-admin {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; padding: 6px 14px; border-radius: 4px;
+    font-size: 11px; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 700; letter-spacing: 1px; transition: all 0.2s;
+  }
+  .btn-admin:hover { background: rgba(255,255,255,0.25); }
+
+  /* NAV */
+  nav {
+    background: var(--blue-mid);
+    display: flex; overflow-x: auto; scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto; padding: 11px 24px;
+    color: rgba(255,255,255,0.65); cursor: pointer;
+    font-size: 12px; font-weight: 700;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s; white-space: nowrap; letter-spacing: 1px;
+  }
+  .tab.active { color: #fff; border-bottom-color: #ffd700; }
+  .tab:hover:not(.active) { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.08); }
+
+  /* MAIN */
+  main { padding: 16px; max-width: 800px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* STATS */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 8px; margin-bottom: 16px;
+  }
+  @media (max-width:480px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+  .stat-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 10px;
+    text-align: center; box-shadow: var(--shadow-sm);
+    border-top: 3px solid var(--blue-light);
+  }
+  .stat-box.green-top { border-top-color: var(--green); }
+  .stat-box.red-top   { border-top-color: var(--red); }
+  .stat-box.gold-top  { border-top-color: var(--gold); }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px; color: var(--blue); line-height: 1;
+  }
+  .stat-box.green-top .stat-num { color: var(--green); }
+  .stat-box.red-top   .stat-num { color: var(--red); }
+  .stat-box.gold-top  .stat-num { color: var(--gold); }
+  .stat-label { font-size: 10px; color: var(--text-sub); margin-top: 3px; font-weight: 700; }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 10px;
+  }
+  .toolbar-title { font-size: 12px; color: var(--text-sub); font-weight: 700; letter-spacing: 1px; }
+
+  /* MONTH FILTER */
+  #monthFilter { scrollbar-width: none; }
+  #monthFilter::-webkit-scrollbar { display: none; }
+  .month-btn {
+    flex: 0 0 auto; padding: 5px 16px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--white);
+    color: var(--text-sub); font-size: 12px; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif; font-weight: 700;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .month-btn:hover { border-color: var(--blue-light); color: var(--blue); }
+  .month-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  /* EVENT CARD */
+  .event-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 10px;
+    box-shadow: var(--shadow-sm); overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .event-item:hover { box-shadow: var(--shadow); }
+  .event-item.expanded { border-color: var(--blue-light); }
+
+  .event-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; cursor: pointer;
+  }
+  .event-date {
+    background: var(--blue); color: #fff;
+    border-radius: 8px; padding: 8px 10px;
+    text-align: center; min-width: 52px; flex-shrink: 0;
+  }
+  .event-date.sun { background: #c0392b; }
+  .event-date.sat { background: #1a5fb4; }
+  .event-date .month   { font-size: 9px; opacity: 0.8; letter-spacing: 1px; }
+  .event-date .day     { font-size: 26px; font-weight: 900; line-height: 1; font-family: 'Bebas Neue', sans-serif; }
+  .event-date .weekday { font-size: 9px; opacity: 0.8; }
+
+  .event-info { flex: 1; min-width: 0; }
+  .event-title { font-weight: 700; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .event-meta  { font-size: 11px; color: var(--text-sub); margin-top: 3px; }
+  .event-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+
+  .badge {
+    display: inline-block; font-size: 10px;
+    padding: 2px 8px; border-radius: 4px; font-weight: 700;
+  }
+  .badge-official { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); font-weight: 900; }
+  .badge-friendly { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+  .att-mini { font-size: 11px; color: var(--text-sub); }
+  .att-mini .ok { color: var(--green); font-weight: 700; }
+  .att-mini .ng { color: var(--red); font-weight: 700; }
+
+  .chevron { color: var(--text-sub); font-size: 18px; transition: transform 0.2s; flex-shrink: 0; }
+  .event-item.expanded .chevron { transform: rotate(90deg); }
+
+  /* EVENT DETAIL */
+  .event-detail { display: none; border-top: 1px solid var(--border); padding: 14px; }
+  .event-item.expanded .event-detail { display: block; }
+
+  .detail-row { display: flex; font-size: 13px; margin-bottom: 8px; gap: 10px; }
+  .detail-label { color: var(--text-sub); min-width: 56px; font-size: 11px; font-weight: 700; flex-shrink: 0; padding-top: 1px; }
+  .detail-value { color: var(--text); flex: 1; }
+  .detail-value a { color: var(--blue-light); text-decoration: none; }
+
+  /* ATTENDANCE */
+  .att-section { margin-top: 14px; }
+  .att-section-title {
+    font-size: 11px; font-weight: 700; color: var(--blue);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--blue-pale);
+  }
+  .att-summary { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .att-count { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 700; }
+  .att-count.ok  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .att-count.ng  { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-border); }
+  .att-count.pnd { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
+
+  .att-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .att-table th {
+    text-align: left; padding: 7px 8px;
+    font-size: 10px; color: var(--text-sub);
+    border-bottom: 2px solid var(--border);
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--bg);
+  }
+  .att-table th.center { text-align: center; }
+  .att-table td { padding: 6px 4px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .att-table td.name   { font-weight: 700; white-space: nowrap; }
+  .att-table td.name .att-name-text { display: inline-block; width: 4em; }
+  .att-table td.center { text-align: center; width: 44px; }
+  .att-table td.comment-cell { width: auto; }
+  .att-table tr:last-child td { border-bottom: none; }
+  .att-table tr.row-ok { background: rgba(10,138,74,0.04); }
+  .att-table tr.row-ng { background: rgba(192,57,43,0.04); }
+
+  .att-btn {
+    width: 36px; height: 30px; border-radius: 6px;
+    border: 1.5px solid var(--border); background: var(--white);
+    font-size: 15px; cursor: pointer; transition: all 0.15s;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-sub);
+  }
+  .att-btn:hover { border-color: var(--blue-light); transform: scale(1.08); }
+  .att-btn.selected-ok  { border-color: var(--green); background: var(--green-bg); color: var(--green); box-shadow: 0 0 0 2px rgba(10,138,74,0.15); }
+  .att-btn.selected-ng  { border-color: var(--red);   background: var(--red-bg);   color: var(--red);   box-shadow: 0 0 0 2px rgba(192,57,43,0.15); }
+  .att-btn.selected-pnd { border-color: #aab; background: #f5f5f8; }
+
+  .comment-input {
+    width: 100%; padding: 5px 8px;
+    border: 1.5px solid var(--border); border-radius: 5px;
+    font-size: 12px; font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text); background: var(--white);
+    transition: border-color 0.2s;
+  }
+  .comment-input:focus { outline: none; border-color: var(--blue-light); }
+  .comment-input::placeholder { color: #bbb; }
+
+  .event-footer {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-top: 14px;
+    padding-top: 12px; border-top: 1px solid var(--border);
+  }
+
+  /* MEMBER */
+  .member-item {
+    display: flex; align-items: center;
+    padding: 8px 12px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 4px; box-shadow: var(--shadow-sm);
+    gap: 10px;
+  }
+  .member-name { font-weight: 700; font-size: 13px; color: var(--text); white-space: nowrap; width: 5.5em; flex-shrink: 0; }
+  .member-tags { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; }
+  .tag { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; padding: 2px 0; border-radius: 4px; font-weight: 700; min-width: 28px; text-align: center; }
+  .tag-team { width: 24px; padding: 2px 0; }
+  .tag-license { min-width: 32px; padding: 2px 6px; }
+  .tag-lic-1  { background: #1a2540; color: #fff; border: 1px solid #1a2540; }
+  .tag-lic-2  { background: var(--blue); color: #fff; border: 1px solid var(--blue); }
+  .tag-lic-3  { background: var(--blue-pale); color: var(--blue); border: 1px solid var(--blue-border); }
+  .tag-lic-4  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .tag-lic-w1 { background: #fce4ec; color: #c2185b; border: 1px solid #f48fb1; }
+  .tag-lic-w2 { background: #fce4ec; color: #c2185b; border: 1px solid #f48fb1; }
+  .tag-lic-none { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
+  .tag-billing { padding: 2px 6px; background: var(--gold-bg); color: var(--gold); border: 1px solid #e0c060; }
+
+  /* FILTER */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-row input, .filter-row select {
+    padding: 7px 10px; font-size: 12px;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    background: var(--white); color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif; outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-row input:focus, .filter-row select:focus { border-color: var(--blue-light); }
+  .filter-row input { flex: 1; min-width: 120px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 14px; }
+  label {
+    display: block; font-size: 10px; font-weight: 700;
+    color: var(--blue); margin-bottom: 6px;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  input, select, textarea {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    font-size: 14px; font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text); background: var(--white);
+    transition: border-color 0.2s; outline: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 0 0 3px rgba(26,127,232,0.1);
+  }
+  input::placeholder, textarea::placeholder { color: #bbb; }
+  select option { background: #fff; }
+  textarea { resize: vertical; min-height: 70px; }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border: 1.5px solid var(--border);
+    border-radius: 6px; background: var(--white);
+    font-size: 14px; color: var(--text);
+  }
+  .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--border); border-radius: 24px; cursor: pointer; transition: 0.2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px; transition: 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--blue-light); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 20px; border-radius: 6px; border: none;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .btn-primary { background: var(--blue); color: #fff; width: 100%; }
+  .btn-primary:hover { background: var(--blue-mid); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-sm { font-size: 11px; padding: 6px 14px; }
+  .btn-ghost {
+    background: var(--white); border: 1.5px solid var(--border); color: var(--text-sub);
+  }
+  .btn-ghost:hover { border-color: var(--blue-light); color: var(--blue); }
+  .btn-danger {
+    background: var(--red-bg); color: var(--red);
+    border: 1px solid var(--red-border); font-size: 12px; padding: 6px 12px;
+  }
+  .btn-danger:hover { background: #fce0dc; }
+
+  /* CARD */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-title {
+    font-weight: 700; font-size: 12px; color: var(--blue);
+    margin-bottom: 14px; letter-spacing: 2px; text-transform: uppercase;
+  }
+
+  /* OVERLAY */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,48,135,0.35); z-index: 200;
+    align-items: flex-end; justify-content: center; padding: 0;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--white); border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 600px; max-height: 90vh;
+    overflow-y: auto; padding: 20px 16px 32px;
+    box-shadow: 0 -4px 30px rgba(0,48,135,0.2);
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-handle {
+    width: 36px; height: 4px; background: var(--border);
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .modal-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 18px;
+    color: var(--blue); letter-spacing: 1px;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-actions .btn { flex: 1; }
+
+  .row { display: flex; gap: 8px; }
+  .row .form-group { flex: 1; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--blue); color: #fff;
+    padding: 10px 24px; border-radius: 30px;
+    font-size: 12px; font-weight: 700;
+    z-index: 999; transition: transform 0.3s; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,48,135,0.3);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-sub); }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; line-height: 1.8; }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 32px; color: var(--text-sub); font-size: 13px; }
+  .spinner {
+    width: 26px; height: 26px; border: 2px solid var(--border);
+    border-top-color: var(--blue-light); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width:480px) {
+    .logo-text { font-size: 13px; }
+    .logo-img  { width: 44px; height: 44px; }
+  }
+
+  /* DEBUG PANEL */
+  #debugPanel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.85); color: #00ff88;
+    font-family: monospace; font-size: 11px;
+    padding: 8px 12px; z-index: 9999;
+    max-height: 180px; overflow-y: auto;
+    display: none;
+  }
+  #debugPanel.show { display: block; }
+  #debugToggle {
+    position: fixed; bottom: 8px; right: 8px;
+    background: #003087; color: #fff;
+    border: none; border-radius: 4px;
+    font-size: 10px; font-weight: 700;
+    padding: 4px 8px; cursor: pointer;
+    z-index: 10000; opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <img class="logo-img" src="../shared/buddylogo.png" alt="バディ世田谷" onerror="this.style.display='none'" />
+      <div>
+        <div class="logo-text">バディ世田谷審判管理</div>
+        <div class="logo-badges">
+          <span class="badge-41">41TH</span>
+          <span class="badge-ver">ver22</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-admin" onclick="openAdminModal()">SETTINGS</button>
+  </div>
+  <nav>
+    <div class="tab active" onclick="showTab('schedule')" id="tab-schedule">試合管理</div>
+    <div class="tab" onclick="showTab('members')"  id="tab-members">審判一覧</div>
+    <div class="tab" onclick="showTab('history')"  id="tab-history">公式戦実績</div>
+    <div class="tab" onclick="showTab('settings')" id="tab-settings">CONFIG</div>
+  </nav>
+</header>
+
+<main>
+
+  <!-- 試合管理 -->
+  <section class="section active" id="section-schedule">
+    <div class="stats-row">
+      <div class="stat-box">          <div class="stat-num" id="statTotal">—</div>  <div class="stat-label">審判数</div></div>
+      <div class="stat-box green-top"><div class="stat-num" id="statActive">—</div>  <div class="stat-label">登録審判</div></div>
+      <div class="stat-box red-top">  <div class="stat-num" id="statBilling">—</div> <div class="stat-label">更新料請求</div></div>
+      <div class="stat-box gold-top"> <div class="stat-num" id="statMatches">—</div> <div class="stat-label">今月試合数</div></div>
+    </div>
+    <div class="toolbar">
+      <span class="toolbar-title">MATCHES</span>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="loadData()">更新</button>
+        <button class="btn btn-primary btn-sm" onclick="openEventModal()">＋ 試合追加</button>
+      </div>
+    </div>
+    <div id="monthFilter" style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;"></div>
+    <div id="eventList"></div>
+  </section>
+
+  <!-- 審判一覧 -->
+  <section class="section" id="section-members">
+    <div class="toolbar">
+      <span class="toolbar-title">審判一覧</span>
+      <button class="btn btn-primary btn-sm" onclick="openMemberModal()">＋ 審判登録</button>
+    </div>
+    <div class="filter-row">
+      <input type="text" id="searchInput" placeholder="名前で検索..." oninput="renderMembers()">
+      <select id="filterLicense" onchange="renderMembers()">
+        <option value="">全ライセンス</option>
+        <option value="1級">1級</option><option value="2級">2級</option>
+        <option value="3級">3級</option><option value="4級">4級</option>
+        <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
+        <option value="なし">なし</option>
+      </select>
+    </div>
+    <div id="memberList"></div>
+  </section>
+
+  <!-- 公式戦実績 -->
+  <section class="section" id="section-history">
+    <div class="toolbar">
+      <span class="toolbar-title">公式戦一覧</span>
+    </div>
+    <div id="historyList" style="margin-top:10px;"></div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="section" id="section-settings">
+    <div class="card">
+      <div class="card-title">データ操作</div>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:12px;">スプレッドシートとの同期を手動で行います</p>
+      <button class="btn btn-primary" onclick="loadData()"> 全データ再読み込み</button>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="card-title">GASコード</div>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:12px;">Apps Scriptのソースコードを確認できます</p>
+      <button class="btn btn-ghost btn-sm" onclick="showGasCode()"> GASコードを表示</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL: 試合 -->
+<div class="overlay" id="eventOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="eventModalTitle">試合追加</div>
+    <input type="hidden" id="eventId" />
+    <div class="row">
+      <div class="form-group">
+        <label>日付</label>
+        <input type="date" id="eventDate" />
+      </div>
+      <div class="form-group">
+        <label>種別</label>
+        <select id="eventType">
+          <option value="official">公式戦</option>
+          <option value="friendly">練習試合</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>試合名</label>
+      <input type="text" id="eventTitle" placeholder="例: 第5節 vs ○○FC" />
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>会場</label>
+        <input type="text" id="eventLocation" placeholder="例: バディフィールド" />
+      </div>
+      <div class="form-group">
+        <label>時間</label>
+        <input type="text" id="eventTime" placeholder="例: 10:00〜12:00" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>カテゴリ</label>
+      <input type="text" id="eventCategory" placeholder="例: U12, 一般" />
+    </div>
+    <div class="form-group">
+      <label>資料リンク</label>
+      <input type="url" id="eventFileUrl" placeholder="Google DriveのURL" />
+    </div>
+    <div class="form-group">
+      <label>メモ</label>
+      <textarea id="eventNote" placeholder="注意事項など"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeEventModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEvent()">保存</button>
+    </div>
+    <div style="text-align:right;margin-top:8px;" id="deleteEventBtn">
+      <button class="btn btn-danger" onclick="deleteEvent()">削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 審判 -->
+<div class="overlay" id="memberOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="memberModalTitle">審判登録</div>
+    <input type="hidden" id="memberId" />
+    <div class="form-group">
+      <label>氏名</label>
+      <input type="text" id="memberName" placeholder="例: 山田 太郎" oninput="updateMemberPreview()" />
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>ライセンス</label>
+        <select id="memberLicense" onchange="updateMemberPreview()">
+          <option value="">選択</option>
+          <option value="1級">1級</option><option value="2級">2級</option>
+          <option value="3級">3級</option><option value="4級">4級</option>
+          <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
+          <option value="なし">なし</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>チーム</label>
+        <select id="memberTeam" onchange="updateMemberPreview()">
+          <option value="">選択</option>
+          <option value="A">Aチーム</option>
+          <option value="B">Bチーム</option>
+        </select>
+      </div>
+    </div>
+    <div id="memberPreview" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:14px;min-height:32px;"></div>
+    <div class="form-group">
+      <label>更新料請求要否</label>
+      <div class="toggle-row">
+        <span>更新料の請求が必要</span>
+        <label class="toggle">
+          <input type="checkbox" id="memberBilling">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>備考</label>
+      <textarea id="memberNote" placeholder="自由記入欄"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeMemberModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveMember()">保存</button>
+    </div>
+    <div style="text-align:right;margin-top:8px;" id="deleteMemberBtn">
+      <button class="btn btn-danger" onclick="deleteMember()">削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GASコード -->
+<div class="overlay" id="gasCodeOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">GAS CODE</div>
+    <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">以下をGoogle Apps Scriptに貼り付けてください</p>
+    <textarea id="gasCodeText" style="font-family:monospace;font-size:11px;height:280px;white-space:pre;" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeGasCodeModal()">閉じる</button>
+      <button class="btn btn-primary" onclick="copyGasCode()">コピー</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Admin -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">SETTINGS</div>
+    <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px;">設定画面に移動します</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAdminModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="enterAdmin()">設定を開く</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== GAS CODE =====
+const GAS_CODE = `// バディ世田谷 41th 審判管理システム - GAS バックエンド
+const SS = SpreadsheetApp.getActiveSpreadsheet();
+function doGet(e)  { return handleRequest(e); }
+function doPost(e) { return handleRequest(e); }
+function handleRequest(e) {
+  const body = e.postData ? JSON.parse(e.postData.contents || '{}') : e.parameter || {};
+  let result;
+  try {
+    switch (body.action) {
+      case 'getAll':        result = getAll();                        break;
+      case 'saveEvent':     result = saveEvent(body);                 break;
+      case 'deleteEvent':   result = deleteRow('matches', body.id);   break;
+      case 'saveMember':    result = saveMember(body);                break;
+      case 'deleteMember':  result = deleteRow('referees', body.id);  break;
+      case 'setAttendance': result = setAttendance(body);             break;
+      default:              result = { error: 'unknown action' };
+    }
+  } catch (err) { result = { error: err.message }; }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+function getAll() {
+  return { events: sheetToArray('matches'), members: sheetToArray('referees'), attendance: sheetToArray('attendance') };
+}
+function sheetToArray(name) {
+  const sh = getOrCreateSheet(name);
+  const data = sh.getDataRange().getValues();
+  if (data.length < 2) return [];
+  const headers = data[0];
+  return data.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h,i) => { let v=row[i]; if(v==='TRUE'||v===true)v=true; if(v==='FALSE'||v===false)v=false; obj[h]=v; });
+    return obj;
+  });
+}
+function getOrCreateSheet(name) {
+  let sh = SS.getSheetByName(name);
+  if (!sh) {
+    sh = SS.insertSheet(name);
+    const headers = {
+      matches:    ['id','date','type','title','location','time','category','fileUrl','note'],
+      referees:   ['id','name','license','billing','team','note'],
+      attendance: ['eventId','memberId','status','comment'],
+    };
+    const headerRow = headers[name] || ['id'];
+    sh.appendRow(headerRow);
+    sh.getRange(1,1,1,headerRow.length).setBackground('#003087').setFontColor('#ffffff').setFontWeight('bold');
+  }
+  return sh;
+}
+function saveEvent(data) {
+  const sh = getOrCreateSheet('matches');
+  const rows = sh.getDataRange().getValues();
+  const id = data.id || new Date().getTime().toString();
+  const row = [id, data.date, data.type, data.title, data.location||'', data.time||'', data.category||'', data.fileUrl||'', data.note||''];
+  const existing = rows.slice(1).findIndex(r => r[0] == id);
+  if (existing >= 0) sh.getRange(existing+2,1,1,row.length).setValues([row]); else sh.appendRow(row);
+  return { ok: true, id };
+}
+function saveMember(data) {
+  const sh = getOrCreateSheet('referees');
+  const rows = sh.getDataRange().getValues();
+  const id = data.id || new Date().getTime().toString();
+  const row = [id, data.name, data.license||'', data.billing, data.team||'', data.note||''];
+  const existing = rows.slice(1).findIndex(r => r[0] == id);
+  if (existing >= 0) sh.getRange(existing+2,1,1,row.length).setValues([row]); else sh.appendRow(row);
+  return { ok: true, id };
+}
+function setAttendance(data) {
+  const sh = getOrCreateSheet('attendance');
+  const rows = sh.getDataRange().getValues();
+  const existing = rows.slice(1).findIndex(r => r[0]==data.eventId && r[1]==data.memberId);
+  if (existing >= 0) { sh.getRange(existing+2,3).setValue(data.status); sh.getRange(existing+2,4).setValue(data.comment||''); }
+  else sh.appendRow([data.eventId, data.memberId, data.status, data.comment||'']);
+  return { ok: true };
+}
+function deleteRow(sheetName, id) {
+  const sh = getOrCreateSheet(sheetName);
+  const rows = sh.getDataRange().getValues();
+  const idx = rows.slice(1).findIndex(r => r[0]==id);
+  if (idx >= 0) sh.deleteRow(idx+2);
+  return { ok: true };
+}
+// === LINE通知 ===
+const LINE_TOKEN = PropertiesService.getScriptProperties().getProperty('LINE_TOKEN');
+const LINE_GROUP_ID = PropertiesService.getScriptProperties().getProperty('LINE_GROUP_ID');
+const SITE_URL = 'https://fumiyax.github.io/buddy41th/';
+function notifyTomorrow() {
+  const sh = getOrCreateSheet('matches');
+  const rows = sh.getDataRange().getValues();
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dateStr = Utilities.formatDate(tomorrow, 'Asia/Tokyo', 'yyyy-MM-dd');
+  rows.slice(1).forEach(function(row) {
+    var rowDate = '';
+    try { rowDate = Utilities.formatDate(new Date(row[1]), 'Asia/Tokyo', 'yyyy-MM-dd'); } catch(e) { rowDate = String(row[1]); }
+    if (rowDate === dateStr) {
+      var title = row[3] || '（タイトルなし）';
+      var location = row[4] || '';
+      var time = row[5] || '';
+      var link = SITE_URL + '#event-' + row[0];
+      var msg = '【明日の試合】\\n' + title;
+      if (location) msg += '\\n会場: ' + location;
+      if (time) msg += '\\n時間: ' + time;
+      msg += '\\n\\n出欠確認はこちら↓\\n' + link;
+      sendLineMessage(msg);
+    }
+  });
+}
+function sendLineMessage(msg) {
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post',
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LINE_TOKEN},
+    payload: JSON.stringify({to: LINE_GROUP_ID, messages: [{type: 'text', text: msg}]})
+  });
+}`;
+
+// ===== STATE =====
+const GAS_URL    = 'https://script.google.com/macros/s/AKfycbzL-SQgXO1R58lwnglbr9dp0f7xzmlzCN2gozSgn4aK1rwkrrOD3OvC6e7vPzN2FTUTcg/exec';
+const TYPE_LABELS  = { official:'公式戦', friendly:'練習試合' };
+const TYPE_CLASSES = { official:'badge-official', friendly:'badge-friendly' };
+const WEEKDAYS     = ['日','月','火','水','木','金','土'];
+
+let state = { events:[], members:[], attendance:[], selectedMonth: null };
+
+function licClass(license) {
+  if (!license || license === 'なし') return 'tag-lic-none';
+  if (license === '1級') return 'tag-lic-1';
+  if (license === '2級') return 'tag-lic-2';
+  if (license === '3級') return 'tag-lic-3';
+  if (license === '4級') return 'tag-lic-4';
+  if (license === '女子1級') return 'tag-lic-w1';
+  if (license === '女子2級') return 'tag-lic-w2';
+  return 'tag-lic-none';
+}
+
+// ===== INIT =====
+function init() {
+  try { document.getElementById('gasCodeText').value = GAS_CODE; } catch(e) {}
+  state.selectedMonth = 'current';
+  setTimeout(loadData, 200);
+}
+
+// ===== API =====
+function dbg(msg) {
+  const el = document.getElementById('debugPanel');
+  if (!el) return;
+  const t = new Date().toLocaleTimeString('ja-JP');
+  el.innerHTML += '<div>[' + t + '] ' + msg + '</div>';
+  el.scrollTop = el.scrollHeight;
+  console.log('[DEBUG]', msg);
+}
+function toggleDebug() {
+  const el = document.getElementById('debugPanel');
+  el.classList.toggle('show');
+}
+
+async function gasRequest(body) {
+  dbg('gasRequest開始: action=' + body.action);
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
+  try {
+    dbg('POST送信中...');
+    const res = await Promise.race([
+      fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) }),
+      timeout
+    ]);
+    dbg('レスポンス受信: status=' + res.status);
+    const json = await res.json();
+    dbg('JSON解析完了: keys=' + Object.keys(json).join(','));
+    return json;
+  } catch(e) {
+    dbg('POST失敗: ' + e.message + ' → GETにフォールバック');
+    try {
+      const res = await Promise.race([
+        fetch(GAS_URL + '?action=' + body.action),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
+      ]);
+      dbg('GETレスポンス: status=' + res.status);
+      const json = await res.json();
+      dbg('GET JSON解析完了');
+      return json;
+    } catch(e2) {
+      dbg('GET失敗: ' + e2.message);
+      return null;
+    }
+  }
+}
+
+async function loadData() {
+  dbg('loadData開始');
+  showToast('読み込み中...');
+  let data = null;
+  try {
+    data = await gasRequest({ action:'getAll' });
+    dbg('getAll結果: ' + (data ? 'OK' : 'null'));
+  } catch(e) {
+    dbg('loadData例外: ' + e.message);
+  }
+  state.events     = (data && Array.isArray(data.events))     ? data.events     : [];
+  state.members    = (data && Array.isArray(data.members))    ? data.members    : [];
+  state.attendance = (data && Array.isArray(data.attendance)) ? data.attendance : [];
+  dbg('state設定完了: events=' + state.events.length + ' members=' + state.members.length + ' attendance=' + state.attendance.length);
+  try { renderStats();       dbg('renderStats完了'); } catch(e) { dbg('renderStats失敗: '+e.message); }
+  try { renderMonthFilter(); dbg('renderMonthFilter完了'); } catch(e) { dbg('renderMonthFilter失敗: '+e.message); }
+  try { renderEvents();      dbg('renderEvents完了'); } catch(e) { dbg('renderEvents失敗: '+e.message); document.getElementById('eventList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
+  try { renderMembers();     dbg('renderMembers完了'); } catch(e) { dbg('renderMembers失敗: '+e.message); document.getElementById('memberList').innerHTML = '<div class="empty-state"><p>表示エラー</p></div>'; }
+  try { renderHistory();     dbg('renderHistory完了'); } catch(e) { dbg('renderHistory失敗: '+e.message); }
+  showToast(data ? '更新しました' : '通信できませんでした');
+  try { openEventFromHash(); } catch(e) { dbg('openEventFromHash失敗: '+e.message); }
+  dbg('loadData完了');
+}
+
+// ===== TABS =====
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ===== STATS =====
+function renderStats() {
+  document.getElementById('statTotal').textContent   = state.members.length;
+  document.getElementById('statActive').textContent  = state.members.length;
+  document.getElementById('statBilling').textContent = state.members.filter(m => m.billing).length;
+  const ym = new Date().toISOString().slice(0,7);
+  document.getElementById('statMatches').textContent = state.events.filter(e => (e.date||'').startsWith(ym)).length;
+}
+
+// ===== MONTH FILTER (過去分・今月・翌月) =====
+function renderMonthFilter() {
+  const now    = new Date();
+  const y      = now.getFullYear();
+  const m      = now.getMonth();
+  const thisM  = `${y}-${String(m+1).padStart(2,'0')}`;
+  const nextM  = `${m===11?y+1:y}-${String(m===11?1:m+2).padStart(2,'0')}`;
+
+  const filters = ['past', 'current', nextM];
+  const labels = { past: '過去分', current: `今月（${m+1}月）`, [nextM]: `翌月（${m===11?1:m+2}月）` };
+  const container = document.getElementById('monthFilter');
+  container.innerHTML = filters.map(f =>
+    `<button class="month-btn ${state.selectedMonth===f?'active':''}" onclick="setMonthFilter('${f}')">${labels[f]}</button>`
+  ).join('');
+}
+
+function setMonthFilter(month) {
+  state.selectedMonth = month;
+  renderMonthFilter();
+  renderEvents();
+}
+
+// ===== EVENTS =====
+function renderEvents() {
+  const container = document.getElementById('eventList');
+  const today = new Date().toISOString().slice(0,10);
+  const thisMonth = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+  const sorted = [...state.events]
+    .filter(ev => {
+      if (!ev.date) return false;
+      if (state.selectedMonth === 'past') return ev.date < today;
+      if (state.selectedMonth === 'current') return ev.date >= today && ev.date.startsWith(thisMonth);
+      return ev.date.startsWith(state.selectedMonth||'');
+    })
+    .sort((a,b) => state.selectedMonth === 'past' ? (a.date > b.date ? -1 : 1) : (a.date < b.date ? -1 : 1));
+
+  if (!sorted.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon"></div><p>この月の試合がありません<br>「＋ 試合追加」で登録しましょう</p></div>`;
+    return;
+  }
+
+  container.innerHTML = sorted.map(ev => {
+    const d   = new Date(ev.date);
+    const wd  = d.getDay();
+    const att = getAttSummary(ev.id);
+    const dc  = wd===0?'sun':wd===6?'sat':'';
+    return `
+    <div class="event-item" id="evitem-${ev.id}">
+      <div class="event-header" onclick="toggleEvent('${ev.id}')">
+        <div class="event-date ${dc}">
+          <div class="month">${d.getMonth()+1}月</div>
+          <div class="day">${d.getDate()}</div>
+          <div class="weekday">(${WEEKDAYS[wd]})</div>
+        </div>
+        <div class="event-info">
+          <div class="event-title">${ev.title||'（タイトルなし）'}</div>
+          <div class="event-meta">${ev.location||'会場未定'}${ev.time?' / '+ev.time:''}${ev.category?' / '+ev.category:''}</div>
+          <div class="event-badges">
+            <span class="badge ${TYPE_CLASSES[ev.type]||'badge-training'}">${TYPE_LABELS[ev.type]||ev.type}</span>
+            <span class="att-mini"><span class="ok">○${att.ok}</span> <span class="ng">×${att.ng}</span> ?${att.pnd}</span>
+          </div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="event-detail">
+        <div class="event-footer" style="margin-top:0;padding-top:0;border-top:none;margin-bottom:12px;">
+          <button class="btn btn-ghost btn-sm" onclick="toggleEvent('${ev.id}')">閉じる</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="copyEventLink('${ev.id}')">リンクコピー</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEventModal('${ev.id}')">編集</button>
+          </div>
+        </div>
+        ${ev.location?`<div class="detail-row"><span class="detail-label">会場</span><span class="detail-value">${ev.location}</span></div>`:''}
+        ${ev.time    ?`<div class="detail-row"><span class="detail-label">時間</span><span class="detail-value">${ev.time}</span></div>`:''}
+        ${ev.category?`<div class="detail-row"><span class="detail-label">カテゴリ</span><span class="detail-value">${ev.category}</span></div>`:''}
+        ${ev.fileUrl ?`<div class="detail-row"><span class="detail-label">資料</span><span class="detail-value"><a href="${ev.fileUrl}" target="_blank">Google Driveで開く</a></span></div>`:''}
+        ${ev.note    ?`<div class="detail-row"><span class="detail-label">メモ</span><span class="detail-value">${ev.note}</span></div>`:''}
+
+        <div class="att-section">
+          <div class="att-section-title"> 審判 出欠確認</div>
+          <div class="att-summary" id="att-summary-${ev.id}">
+            <span class="att-count ok">参加 ${att.ok}人</span>
+            <span class="att-count ng">欠席 ${att.ng}人</span>
+            <span class="att-count pnd">未回答 ${att.pnd}人</span>
+          </div>
+          <div id="attgrid-${ev.id}">${renderAttGrid(ev.id)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEvent(id) {
+  document.getElementById('evitem-' + id).classList.toggle('expanded');
+}
+
+function getAttSummary(eventId) {
+  const evAtt = state.attendance.filter(a => a.eventId == eventId);
+  const ok  = evAtt.filter(a => a.status === 'ok').length;
+  const ng  = evAtt.filter(a => a.status === 'ng').length;
+  const pnd = state.members.length - ok - ng;
+  return { ok, ng, pnd };
+}
+
+function renderAttGrid(eventId) {
+  if (!state.members.length) return '<div style="font-size:12px;color:var(--text-sub);padding:8px 0;">審判が登録されていません</div>';
+  var ev = state.events.find(function(e) { return e.id == eventId; });
+  var isOfficial = ev && ev.type === 'official';
+  var html = '';
+  if (isOfficial) {
+    html += '<div style="font-size:11px;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:6px;padding:6px 10px;margin-bottom:8px;">公式戦のため審判資格保有者のみ選択できます</div>';
+  }
+  html += '<table class="att-table"><thead><tr><th>審判名</th><th class="center">参加</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
+  var sortedMembers = [].concat(state.members);
+  try { sortedMembers.sort(function(a, b) { return (a.name||'').localeCompare(b.name||'', 'ja'); }); } catch(e) {}
+  sortedMembers.forEach(function(m) {
+    var hasLicense = m.license && m.license !== 'なし' && m.license !== '';
+    var disabled = isOfficial && !hasLicense;
+    var att = disabled ? null : state.attendance.find(function(a) { return a.eventId == eventId && a.memberId == m.id; });
+    var status = att ? att.status : 'pnd';
+    var comment = att ? (att.comment || '') : '';
+    var safeComment = comment.replace(/"/g, '&quot;');
+    var rowStyle = disabled ? ' style="opacity:0.38;background:#f5f5f8;"' : '';
+    var rowClass = disabled ? '' : (status === 'ok' ? 'row-ok' : status === 'ng' ? 'row-ng' : '');
+    var teamTag = '';
+    if (m.team === 'A') teamTag = '<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;margin-left:4px;">A</span>';
+    else if (m.team === 'B') teamTag = '<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;margin-left:4px;">B</span>';
+    else teamTag = '<span class="tag tag-team" style="border:1px solid transparent;margin-left:4px;"></span>';
+    var licTag = m.license
+      ? '<span class="tag tag-license ' + licClass(m.license) + '" style="margin-left:2px;">' + m.license + '</span>'
+      : '<span class="tag tag-license tag-lic-none" style="margin-left:2px;">なし</span>';
+    var disTag = disabled ? '<span style="font-size:10px;color:var(--red);margin-left:2px;">不可</span>' : '';
+    html += '<tr class="' + rowClass + '"' + rowStyle + '>';
+    html += '<td class="name"><span class="att-name-text">' + m.name + '</span>' + teamTag + licTag + disTag + '</td>';
+    var eid = String(eventId);
+    var mid = String(m.id);
+    var btns = ['ok','ng','pnd'];
+    btns.forEach(function(s) {
+      var label = s === 'ok' ? '○' : s === 'ng' ? '×' : '?';
+      var sel = (!disabled && status === s) ? ' selected-' + s : '';
+      if (disabled) {
+        html += '<td class="center"><button class="att-btn' + sel + '" disabled style="cursor:not-allowed">' + label + '</button></td>';
+      } else {
+        html += '<td class="center"><button class="att-btn' + sel + '" onclick="setAttUI(' + "'" + eid + "','" + mid + "','" + s + "'" + ')">' + label + '</button></td>';
+      }
+    });
+    var ph = disabled ? '公式戦のため対象外' : 'コメント...';
+    var val = disabled ? '' : safeComment;
+    var disAttr = disabled ? ' disabled' : '';
+    html += '<td class="comment-cell"><input type="text" class="comment-input" placeholder="' + ph + '" value="' + val + '"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" onclick="event.stopPropagation()"/></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  return html;
+}
+
+async function setAttUI(eventId, memberId, status) {
+  const att = state.attendance.find(a => a.eventId==eventId && a.memberId==memberId);
+  if (att) att.status = status;
+  else state.attendance.push({ eventId, memberId, status, comment:'' });
+  document.getElementById('attgrid-' + eventId).innerHTML = renderAttGrid(eventId);
+  const sum = getAttSummary(eventId);
+  const el  = document.getElementById('att-summary-' + eventId);
+  if (el) el.innerHTML = `<span class="att-count ok">参加 ${sum.ok}人</span><span class="att-count ng">欠席 ${sum.ng}人</span><span class="att-count pnd">未回答 ${sum.pnd}人</span>`;
+  const item = document.getElementById('evitem-' + eventId);
+  if (item) { const mini = item.querySelector('.att-mini'); if(mini) mini.innerHTML=`<span class="ok">○${sum.ok}</span> <span class="ng">×${sum.ng}</span> ?${sum.pnd}`; }
+  try { renderHistory(); } catch(e) {}
+  gasRequest({ action:'setAttendance', eventId, memberId, status });
+}
+
+async function saveComment(eventId, memberId, comment) {
+  const att = state.attendance.find(a => a.eventId==eventId && a.memberId==memberId);
+  if (att) att.comment = comment;
+  else state.attendance.push({ eventId, memberId, status:'pnd', comment });
+  gasRequest({ action:'setAttendance', eventId, memberId, status: att?att.status:'pnd', comment });
+}
+
+// ===== EVENT MODAL =====
+function openEventModal(id) {
+  const ev = id ? state.events.find(e => e.id==id) : null;
+  document.getElementById('eventModalTitle').textContent = ev ? '試合編集' : '試合追加';
+  document.getElementById('eventId').value       = ev ? ev.id       : '';
+  document.getElementById('eventDate').value     = ev ? ev.date     : '';
+  document.getElementById('eventType').value     = ev ? ev.type     : 'league';
+  document.getElementById('eventTitle').value    = ev ? ev.title    : '';
+  document.getElementById('eventLocation').value = ev ? ev.location : '';
+  document.getElementById('eventTime').value     = ev ? ev.time     : '';
+  document.getElementById('eventCategory').value = ev ? ev.category : '';
+  document.getElementById('eventFileUrl').value  = ev ? ev.fileUrl  : '';
+  document.getElementById('eventNote').value     = ev ? ev.note     : '';
+  document.getElementById('deleteEventBtn').style.display = ev ? 'block' : 'none';
+  document.getElementById('eventOverlay').classList.add('show');
+}
+function closeAllModals() {
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('show'));
+}
+function closeEventModal()  { document.getElementById('eventOverlay').classList.remove('show'); }
+
+async function saveEvent() {
+  const data = {
+    action:'saveEvent',
+    id:       document.getElementById('eventId').value || Date.now().toString(),
+    date:     document.getElementById('eventDate').value,
+    type:     document.getElementById('eventType').value,
+    title:    document.getElementById('eventTitle').value,
+    location: document.getElementById('eventLocation').value,
+    time:     document.getElementById('eventTime').value,
+    category: document.getElementById('eventCategory').value,
+    fileUrl:  document.getElementById('eventFileUrl').value,
+    note:     document.getElementById('eventNote').value,
+  };
+  if (!data.date || !data.title) { showToast('日付とタイトルを入力してください'); return; }
+  const ex = state.events.findIndex(e => e.id==data.id);
+  if (ex>=0) state.events[ex]=data; else state.events.push(data);
+  renderStats(); renderMonthFilter(); renderEvents();
+  closeEventModal(); showToast('保存しました');
+  await gasRequest(data);
+}
+
+async function deleteEvent() {
+  if (!confirm('この試合を削除しますか？')) return;
+  const id = document.getElementById('eventId').value;
+  state.events     = state.events.filter(e => e.id!=id);
+  state.attendance = state.attendance.filter(a => a.eventId!=id);
+  renderStats(); renderEvents();
+  closeAllModals(); showToast('削除しました');
+  await gasRequest({ action:'deleteEvent', id });
+}
+
+// ===== MEMBERS =====
+function renderMembers() {
+  const container = document.getElementById('memberList');
+  const search    = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  const filterLic = document.getElementById('filterLicense')?.value||'';
+  let sorted = [];
+  try { sorted = [...state.members].sort((a,b) => (a.name||'').localeCompare(b.name||'', 'ja')); }
+  catch(e) { sorted = [...state.members]; }
+  const list = sorted.filter(m => {
+    if (search && !(m.name||'').toLowerCase().includes(search)) return false;
+    if (filterLic && m.license!==filterLic) return false;
+    return true;
+  });
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon"></div><p>審判が登録されていません<br>「＋ 審判登録」で追加しましょう</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map(m => `
+    <div class="member-item" onclick="openMemberModal('${m.id}')" style="cursor:pointer;">
+      <span class="member-name">${m.name}</span>
+      <span class="member-tags">
+        ${m.team==='A'?`<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>`:m.team==='B'?`<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>`:`<span class="tag tag-team" style="border:1px solid transparent;"></span>`}
+        ${m.license?`<span class="tag tag-license ${licClass(m.license)}">${m.license}</span>`:`<span class="tag tag-license" style="visibility:hidden;">4級</span>`}
+        ${m.billing?`<span class="tag tag-billing">請求</span>`:''}
+      </span>
+      <span style="margin-left:auto;color:var(--text-sub);font-size:14px;flex-shrink:0;">›</span>
+    </div>`).join('');
+}
+
+function openMemberModal(id) {
+  const m = id ? state.members.find(m => m.id==id) : null;
+  document.getElementById('memberModalTitle').textContent  = m ? '審判編集' : '審判登録';
+  document.getElementById('memberId').value      = m ? m.id      : '';
+  document.getElementById('memberName').value    = m ? m.name    : '';
+  document.getElementById('memberLicense').value = m ? m.license : '';
+  document.getElementById('memberTeam').value    = m ? (m.team||'') : '';
+  document.getElementById('memberBilling').checked = m ? !!m.billing : false;
+  document.getElementById('memberNote').value    = m ? m.note    : '';
+  document.getElementById('deleteMemberBtn').style.display = m ? 'block' : 'none';
+  document.getElementById('memberOverlay').classList.add('show');
+  updateMemberPreview();
+}
+function closeMemberModal() { document.getElementById('memberOverlay').classList.remove('show'); }
+
+function updateMemberPreview() {
+  var name = document.getElementById('memberName').value || '名前';
+  var license = document.getElementById('memberLicense').value;
+  var team = document.getElementById('memberTeam').value;
+  var html = '<span style="font-weight:700;font-size:13px;width:5.5em;flex-shrink:0;">' + name + '</span>';
+  if (team === 'A') html += '<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>';
+  else if (team === 'B') html += '<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>';
+  if (license) html += '<span class="tag tag-license ' + licClass(license) + '">' + license + '</span>';
+  document.getElementById('memberPreview').innerHTML = html;
+}
+
+async function saveMember() {
+  const data = {
+    action:'saveMember',
+    id:      document.getElementById('memberId').value || Date.now().toString(),
+    name:    document.getElementById('memberName').value,
+    license: document.getElementById('memberLicense').value,
+    team:    document.getElementById('memberTeam').value,
+    billing: document.getElementById('memberBilling').checked,
+    note:    document.getElementById('memberNote').value,
+  };
+  if (!data.name) { showToast('氏名を入力してください'); return; }
+  const ex = state.members.findIndex(m => m.id==data.id);
+  if (ex>=0) state.members[ex]=data; else state.members.push(data);
+  renderMembers(); renderStats();
+  closeMemberModal(); showToast('保存しました');
+  await gasRequest(data);
+}
+
+async function deleteMember() {
+  if (!confirm('この審判を削除しますか？')) return;
+  const id = document.getElementById('memberId').value;
+  state.members = state.members.filter(m => m.id!=id);
+  renderMembers(); renderStats();
+  closeAllModals(); showToast('削除しました');
+  await gasRequest({ action:'deleteMember', id });
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  const officialEvents = state.events.filter(e => e.type === 'official').sort((a,b) => a.date > b.date ? -1 : 1);
+  const listEl = document.getElementById('historyList');
+
+  if (!officialEvents.length) {
+    listEl.innerHTML = '<div class="empty-state"><p>公式戦のデータがありません</p></div>';
+    return;
+  }
+  listEl.innerHTML = officialEvents.map(ev => {
+    const d = new Date(ev.date);
+    const wd = d.getDay();
+    const dc = wd===0?'sun':wd===6?'sat':'';
+    const assigned = state.attendance
+      .filter(a => a.eventId == ev.id && a.status === 'ok')
+      .map(a => { const m = state.members.find(m => m.id == a.memberId); return m ? {name: m.name, team: m.team||''} : null; })
+      .filter(a => a);
+    return '<div class="event-item">' +
+      '<div class="event-header" style="cursor:default;">' +
+        '<div class="event-date ' + dc + '">' +
+          '<div class="month">' + (d.getMonth()+1) + '月</div>' +
+          '<div class="day">' + d.getDate() + '</div>' +
+          '<div class="weekday">(' + WEEKDAYS[wd] + ')</div>' +
+        '</div>' +
+        '<div class="event-info">' +
+          '<div class="event-title">' + (ev.title||'（タイトルなし）') + '</div>' +
+          '<div class="event-meta">' + (ev.location||'') + (ev.time?' / '+ev.time:'') + '</div>' +
+          '<div class="event-badges">' +
+            '<span class="badge badge-official">公式戦</span>' +
+            (assigned.length
+              ? assigned.map(a => { var tc = a.team==='A' ? 'background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;' : a.team==='B' ? 'background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;' : 'background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);'; return '<span class="badge" style="' + tc + '">' + a.name + (a.team ? ' ('+a.team+')' : '') + '</span>'; }).join('')
+              : '<span style="font-size:11px;color:var(--text-sub);">担当未定</span>') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== EVENT LINK =====
+function copyEventLink(eventId) {
+  var url = location.origin + location.pathname + '#event-' + eventId;
+  navigator.clipboard.writeText(url).then(function() { showToast('リンクをコピーしました'); });
+}
+
+function openEventFromHash() {
+  var hash = location.hash;
+  if (!hash || !hash.startsWith('#event-')) return;
+  var eventId = hash.replace('#event-', '');
+  var ev = state.events.find(function(e) { return String(e.id) === eventId; });
+  if (!ev) return;
+  // 該当月に切り替え
+  if (ev.date) state.selectedMonth = ev.date.slice(0, 7);
+  showTab('schedule');
+  renderMonthFilter();
+  renderEvents();
+  // 展開してスクロール
+  setTimeout(function() {
+    var el = document.getElementById('evitem-' + eventId);
+    if (el) {
+      el.classList.add('expanded');
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+}
+
+// ===== ADMIN =====
+function openAdminModal()   { document.getElementById('adminOverlay').classList.add('show'); }
+function closeAdminModal()  { document.getElementById('adminOverlay').classList.remove('show'); }
+function enterAdmin()       { closeAdminModal(); showTab('settings'); }
+function showGasCode()      { document.getElementById('gasCodeOverlay').classList.add('show'); }
+function closeGasCodeModal(){ document.getElementById('gasCodeOverlay').classList.remove('show'); }
+function copyGasCode()      { navigator.clipboard.writeText(GAS_CODE).then(() => showToast('コピーしました')); }
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ===== OVERLAY CLOSE =====
+document.querySelectorAll('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target===ov) closeAllModals(); });
+});
+
+init();
+</script>
+
+<div id="debugPanel"></div>
+<button id="debugToggle" onclick="toggleDebug()">DEBUG</button>
+</body>
+</html>
