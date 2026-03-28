@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver22</span>
+          <span class="badge-ver">ver23</span>
         </div>
       </div>
     </div>
@@ -1098,11 +1098,17 @@ async function saveComment(eventId, memberId, comment) {
 }
 
 // ===== EVENT MODAL =====
+function formatDateValue(v) {
+  if (!v) return '';
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+  try { const d = new Date(v); if (!isNaN(d)) return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch(e) {}
+  return String(v);
+}
 function openEventModal(id) {
   const ev = id ? state.events.find(e => e.id==id) : null;
   document.getElementById('eventModalTitle').textContent = ev ? '試合編集' : '試合追加';
   document.getElementById('eventId').value       = ev ? ev.id       : '';
-  document.getElementById('eventDate').value     = ev ? ev.date     : '';
+  document.getElementById('eventDate').value     = ev ? formatDateValue(ev.date) : '';
   document.getElementById('eventType').value     = ev ? ev.type     : 'league';
   document.getElementById('eventTitle').value    = ev ? ev.title    : '';
   document.getElementById('eventLocation').value = ev ? ev.location : '';

@@ -29,6 +29,7 @@
 | `index_ver19_line-notify.html` | 2025-03-26 | LINE前日通知機能追加 |
 | `index_ver20_month-filter.html` | 2025-03-26 | 試合フィルタに過去分追加 |
 | `index_ver21_today-filter.html` | 2025-03-26 | フィルタを今日基準に変更 |
+| `index_ver22_before-date-fix.html` | 2026-03-28 | 試合編集時の日付リセット修正前 |
 
 ---
 
