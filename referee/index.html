@@ -256,11 +256,14 @@
   .att-btn.selected-pnd { border-color: #aab; background: #f5f5f8; }
 
   .comment-input {
-    width: 100%; padding: 5px 8px;
+    width: 100%; padding: 4px 6px;
     border: 1.5px solid var(--border); border-radius: 5px;
     font-size: 12px; font-family: 'Noto Sans JP', sans-serif;
     color: var(--text); background: var(--white);
     transition: border-color 0.2s;
+    resize: none; overflow: hidden;
+    min-height: 26px; line-height: 1.4;
+    display: block;
   }
   .comment-input:focus { outline: none; border-color: var(--blue-light); }
   .comment-input::placeholder { color: #bbb; }
@@ -473,7 +476,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver23</span>
+          <span class="badge-ver">ver24</span>
         </div>
       </div>
     </div>
@@ -1067,9 +1070,9 @@ function renderAttGrid(eventId) {
       }
     });
     var ph = disabled ? '公式戦のため対象外' : 'コメント...';
-    var val = disabled ? '' : safeComment;
+    var val = disabled ? '' : comment.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     var disAttr = disabled ? ' disabled' : '';
-    html += '<td class="comment-cell"><input type="text" class="comment-input" placeholder="' + ph + '" value="' + val + '"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" onclick="event.stopPropagation()"/></td>';
+    html += '<td class="comment-cell"><textarea class="comment-input" placeholder="' + ph + '" rows="1"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onclick="event.stopPropagation()">' + val + '</textarea></td>';
     html += '</tr>';
   });
   html += '</tbody></table>';
@@ -1080,7 +1083,9 @@ async function setAttUI(eventId, memberId, status) {
   const att = state.attendance.find(a => a.eventId==eventId && a.memberId==memberId);
   if (att) att.status = status;
   else state.attendance.push({ eventId, memberId, status, comment:'' });
-  document.getElementById('attgrid-' + eventId).innerHTML = renderAttGrid(eventId);
+  const grid = document.getElementById('attgrid-' + eventId);
+  grid.innerHTML = renderAttGrid(eventId);
+  grid.querySelectorAll('.comment-input').forEach(ta => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
   const sum = getAttSummary(eventId);
   const el  = document.getElementById('att-summary-' + eventId);
   if (el) el.innerHTML = `<span class="att-count ok">参加 ${sum.ok}人</span><span class="att-count ng">欠席 ${sum.ng}人</span><span class="att-count pnd">未回答 ${sum.pnd}人</span>`;
