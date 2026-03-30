@@ -37,6 +37,7 @@
 | `index_ver22_before-date-fix.html` | 2026-03-28 | 試合編集時の日付リセット修正前 |
 | `index_ver23_before-comment-improve.html` | 2026-03-28 | コメント欄textarea化前 |
 | `index_ver25_before-role-split.html` | 2026-03-30 | 審判/指導者分離前 |
+| `index_ver26_before-composite.html` | 2026-03-30 | 審判/指導者複合管理化前 |
 
 ---
 
@@ -73,7 +74,7 @@
 | シート | カラム |
 |---|---|
 | matches | id, date, type(`official`/`friendly`), title, location, time, category, fileUrl, note |
-| referees | id, name, license(`1級`〜`4級`,`女子1級`,`女子2級`,`なし`), billing(bool), team(`A`/`B`), note |
+| referees | id, name, license(`1級`〜`4級`,`女子1級`,`女子2級`,空), billing(bool), team(`A`/`B`), note, coachLicense(`S級`〜`D級`,`キッズリーダー`,空) |
 | attendance | eventId, memberId, status(`ok`/`ng`/`pnd`), comment |
 
 ### GAS API
@@ -85,6 +86,6 @@
 | `getAll` | 全データ取得 | なし |
 | `saveEvent` | 試合の追加/更新 | id, date, type, title, location, time, category, fileUrl, note |
 | `deleteEvent` | 試合削除 | id |
-| `saveMember` | 審判の追加/更新 | id, name, license, billing, team, note |
+| `saveMember` | 審判の追加/更新 | id, name, license, billing, team, note, coachLicense |
 | `deleteMember` | 審判削除 | id |
 | `setAttendance` | 出欠登録 | eventId, memberId, status, comment |
