@@ -31,6 +31,7 @@
 | `index_ver21_today-filter.html` | 2025-03-26 | フィルタを今日基準に変更 |
 | `index_ver22_before-date-fix.html` | 2026-03-28 | 試合編集時の日付リセット修正前 |
 | `index_ver23_before-comment-improve.html` | 2026-03-28 | コメント欄textarea化前 |
+| `index_ver25_before-role-split.html` | 2026-03-30 | 審判/指導者分離前 |
 
 ---
 

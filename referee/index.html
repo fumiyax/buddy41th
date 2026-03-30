@@ -295,6 +295,19 @@
   .tag-lic-w2 { background: #fce4ec; color: #c2185b; border: 1px solid #f48fb1; }
   .tag-lic-none { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
   .tag-billing { padding: 2px 6px; background: var(--gold-bg); color: var(--gold); border: 1px solid #e0c060; }
+  .tag-coach-s  { background: #1a2540; color: #fff; border: 1px solid #1a2540; }
+  .tag-coach-a  { background: #6d28d9; color: #fff; border: 1px solid #6d28d9; }
+  .tag-coach-b  { background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd; }
+  .tag-coach-c  { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .tag-coach-d  { background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7; }
+  .tag-coach-kids { background: #fce7f3; color: #9d174d; border: 1px solid #f9a8d4; }
+  .member-section-title {
+    font-size: 12px; font-weight: 900; color: var(--blue);
+    letter-spacing: 1.5px; margin: 16px 0 8px;
+    padding: 6px 10px; background: var(--blue-pale);
+    border-radius: 6px; border-left: 4px solid var(--blue);
+  }
+  .member-section-title:first-child { margin-top: 0; }
 
   /* FILTER */
   .filter-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -476,7 +489,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver25</span>
+          <span class="badge-ver">ver26</span>
         </div>
       </div>
     </div>
@@ -496,7 +509,7 @@
   <section class="section active" id="section-schedule">
     <div class="stats-row">
       <div class="stat-box">          <div class="stat-num" id="statTotal">—</div>  <div class="stat-label">審判数</div></div>
-      <div class="stat-box green-top"><div class="stat-num" id="statActive">—</div>  <div class="stat-label">登録審判</div></div>
+      <div class="stat-box green-top"><div class="stat-num" id="statActive">—</div>  <div class="stat-label" id="statActiveLabel">登録審判</div></div>
       <div class="stat-box red-top">  <div class="stat-num" id="statBilling">—</div> <div class="stat-label">更新料請求</div></div>
       <div class="stat-box gold-top"> <div class="stat-num" id="statMatches">—</div> <div class="stat-label">今月試合数</div></div>
     </div>
@@ -514,16 +527,23 @@
   <!-- 審判一覧 -->
   <section class="section" id="section-members">
     <div class="toolbar">
-      <span class="toolbar-title">審判一覧</span>
-      <button class="btn btn-primary btn-sm" onclick="openMemberModal()">＋ 審判登録</button>
+      <span class="toolbar-title">審判・指導者一覧</span>
+      <button class="btn btn-primary btn-sm" onclick="openMemberModal()">＋ 登録</button>
     </div>
     <div class="filter-row">
       <input type="text" id="searchInput" placeholder="名前で検索..." oninput="renderMembers()">
       <select id="filterLicense" onchange="renderMembers()">
         <option value="">全ライセンス</option>
-        <option value="1級">1級</option><option value="2級">2級</option>
-        <option value="3級">3級</option><option value="4級">4級</option>
-        <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
+        <optgroup label="審判">
+          <option value="1級">1級</option><option value="2級">2級</option>
+          <option value="3級">3級</option><option value="4級">4級</option>
+          <option value="女子1級">女子1級</option><option value="女子2級">女子2級</option>
+        </optgroup>
+        <optgroup label="指導者">
+          <option value="S級">S級</option><option value="A級">A級</option>
+          <option value="B級">B級</option><option value="C級">C級</option>
+          <option value="D級">D級</option><option value="キッズリーダー">キッズリーダー</option>
+        </optgroup>
         <option value="なし">なし</option>
       </select>
     </div>
@@ -620,6 +640,13 @@
       <input type="text" id="memberName" placeholder="例: 山田 太郎" oninput="updateMemberPreview()" />
     </div>
     <div class="row">
+      <div class="form-group">
+        <label>種別</label>
+        <select id="memberRole" onchange="onRoleChange()">
+          <option value="referee">審判</option>
+          <option value="coach">指導者</option>
+        </select>
+      </div>
       <div class="form-group">
         <label>ライセンス</label>
         <select id="memberLicense" onchange="updateMemberPreview()">
@@ -735,7 +762,7 @@ function getOrCreateSheet(name) {
     sh = SS.insertSheet(name);
     const headers = {
       matches:    ['id','date','type','title','location','time','category','fileUrl','note'],
-      referees:   ['id','name','license','billing','team','note'],
+      referees:   ['id','name','license','billing','team','note','role'],
       attendance: ['eventId','memberId','status','comment'],
     };
     const headerRow = headers[name] || ['id'];
@@ -757,7 +784,7 @@ function saveMember(data) {
   const sh = getOrCreateSheet('referees');
   const rows = sh.getDataRange().getValues();
   const id = data.id || new Date().getTime().toString();
-  const row = [id, data.name, data.license||'', data.billing, data.team||'', data.note||''];
+  const row = [id, data.name, data.license||'', data.billing, data.team||'', data.note||'', data.role||'referee'];
   const existing = rows.slice(1).findIndex(r => r[0] == id);
   if (existing >= 0) sh.getRange(existing+2,1,1,row.length).setValues([row]); else sh.appendRow(row);
   return { ok: true, id };
@@ -827,7 +854,30 @@ function licClass(license) {
   if (license === '4級') return 'tag-lic-4';
   if (license === '女子1級') return 'tag-lic-w1';
   if (license === '女子2級') return 'tag-lic-w2';
+  if (license === 'S級') return 'tag-coach-s';
+  if (license === 'A級') return 'tag-coach-a';
+  if (license === 'B級') return 'tag-coach-b';
+  if (license === 'C級') return 'tag-coach-c';
+  if (license === 'D級') return 'tag-coach-d';
+  if (license === 'キッズリーダー') return 'tag-coach-kids';
   return 'tag-lic-none';
+}
+
+const REFEREE_LICENSES = ['1級','2級','3級','4級','女子1級','女子2級','なし'];
+const COACH_LICENSES   = ['S級','A級','B級','C級','D級','キッズリーダー','なし'];
+
+function getMemberRole(m) {
+  return (m.role === 'coach') ? 'coach' : 'referee';
+}
+
+function onRoleChange() {
+  var role = document.getElementById('memberRole').value;
+  var sel = document.getElementById('memberLicense');
+  var current = sel.value;
+  var opts = role === 'coach' ? COACH_LICENSES : REFEREE_LICENSES;
+  sel.innerHTML = '<option value="">選択</option>' + opts.map(function(o) { return '<option value="' + o + '">' + o + '</option>'; }).join('');
+  if (opts.includes(current)) sel.value = current; else sel.value = '';
+  updateMemberPreview();
 }
 
 // ===== INIT =====
@@ -916,8 +966,11 @@ function showTab(name) {
 
 // ===== STATS =====
 function renderStats() {
-  document.getElementById('statTotal').textContent   = state.members.length;
-  document.getElementById('statActive').textContent  = state.members.length;
+  const referees = state.members.filter(m => getMemberRole(m) === 'referee');
+  const coaches  = state.members.filter(m => getMemberRole(m) === 'coach');
+  document.getElementById('statTotal').textContent   = referees.length;
+  document.getElementById('statActive').textContent  = referees.length + (coaches.length ? '+' + coaches.length : '');
+  document.getElementById('statActiveLabel').textContent = coaches.length ? '審判+指導者' : '登録審判';
   document.getElementById('statBilling').textContent = state.members.filter(m => m.billing).length;
   const ym = new Date().toISOString().slice(0,7);
   document.getElementById('statMatches').textContent = state.events.filter(e => (e.date||'').startsWith(ym)).length;
@@ -1002,7 +1055,7 @@ function renderEvents() {
         ${ev.note    ?`<div class="detail-row"><span class="detail-label">メモ</span><span class="detail-value">${ev.note}</span></div>`:''}
 
         <div class="att-section">
-          <div class="att-section-title"> 審判 出欠確認</div>
+          <div class="att-section-title">出欠確認</div>
           <div class="att-summary" id="att-summary-${ev.id}">
             <span class="att-count ok">参加 ${att.ok}人</span>
             <span class="att-count ng">欠席 ${att.ng}人</span>
@@ -1031,24 +1084,15 @@ function getAttSummary(eventId) {
   return { ok, ng, pnd };
 }
 
-function renderAttGrid(eventId) {
-  if (!state.members.length) return '<div style="font-size:12px;color:var(--text-sub);padding:8px 0;">審判が登録されていません</div>';
-  var ev = state.events.find(function(e) { return e.id == eventId; });
-  var isOfficial = ev && ev.type === 'official';
+function renderAttRows(members, eventId, isOfficial) {
   var html = '';
-  if (isOfficial) {
-    html += '<div style="font-size:11px;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:6px;padding:6px 10px;margin-bottom:8px;">公式戦のため審判資格保有者のみ選択できます</div>';
-  }
-  html += '<table class="att-table"><thead><tr><th>審判名</th><th class="center">参加</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
-  var sortedMembers = [].concat(state.members);
-  try { sortedMembers.sort(function(a, b) { return (a.name||'').localeCompare(b.name||'', 'ja'); }); } catch(e) {}
-  sortedMembers.forEach(function(m) {
+  members.forEach(function(m) {
+    var role = getMemberRole(m);
     var hasLicense = m.license && m.license !== 'なし' && m.license !== '';
-    var disabled = isOfficial && !hasLicense;
+    var disabled = isOfficial && role === 'referee' && !hasLicense;
     var att = disabled ? null : state.attendance.find(function(a) { return a.eventId == eventId && a.memberId == m.id; });
     var status = att ? att.status : 'pnd';
     var comment = att ? (att.comment || '') : '';
-    var safeComment = comment.replace(/"/g, '&quot;');
     var rowStyle = disabled ? ' style="opacity:0.38;background:#f5f5f8;"' : '';
     var rowClass = disabled ? '' : (status === 'ok' ? 'row-ok' : status === 'ng' ? 'row-ng' : '');
     var teamTag = '';
@@ -1079,7 +1123,33 @@ function renderAttGrid(eventId) {
     html += '<td class="comment-cell"><textarea class="comment-input" placeholder="' + ph + '" rows="1"' + disAttr + ' onchange="saveComment(' + "'" + eid + "','" + mid + "'" + ',this.value)" oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onclick="event.stopPropagation()">' + val + '</textarea></td>';
     html += '</tr>';
   });
-  html += '</tbody></table>';
+  return html;
+}
+
+function renderAttGrid(eventId) {
+  if (!state.members.length) return '<div style="font-size:12px;color:var(--text-sub);padding:8px 0;">審判・指導者が登録されていません</div>';
+  var ev = state.events.find(function(e) { return e.id == eventId; });
+  var isOfficial = ev && ev.type === 'official';
+  var html = '';
+  if (isOfficial) {
+    html += '<div style="font-size:11px;color:var(--blue);background:var(--blue-pale);border:1px solid var(--blue-border);border-radius:6px;padding:6px 10px;margin-bottom:8px;">公式戦のため審判資格保有者のみ選択できます</div>';
+  }
+  var sortedMembers = [].concat(state.members);
+  try { sortedMembers.sort(function(a, b) { return (a.name||'').localeCompare(b.name||'', 'ja'); }); } catch(e) {}
+  var referees = sortedMembers.filter(function(m) { return getMemberRole(m) === 'referee'; });
+  var coaches  = sortedMembers.filter(function(m) { return getMemberRole(m) === 'coach'; });
+  if (referees.length) {
+    html += '<div class="member-section-title" style="margin-top:0;">審判</div>';
+    html += '<table class="att-table"><thead><tr><th>氏名</th><th class="center">参加</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
+    html += renderAttRows(referees, eventId, isOfficial);
+    html += '</tbody></table>';
+  }
+  if (coaches.length) {
+    html += '<div class="member-section-title">指導者</div>';
+    html += '<table class="att-table"><thead><tr><th>氏名</th><th class="center">参加</th><th class="center">欠席</th><th class="center">未定</th><th>コメント</th></tr></thead><tbody>';
+    html += renderAttRows(coaches, eventId, isOfficial);
+    html += '</tbody></table>';
+  }
   return html;
 }
 
@@ -1165,6 +1235,18 @@ async function deleteEvent() {
 }
 
 // ===== MEMBERS =====
+function renderMemberItem(m) {
+  return '<div class="member-item" onclick="openMemberModal(\'' + m.id + '\')" style="cursor:pointer;">' +
+    '<span class="member-name">' + m.name + '</span>' +
+    '<span class="member-tags">' +
+      (m.team==='A'?'<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>':m.team==='B'?'<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>':'<span class="tag tag-team" style="border:1px solid transparent;"></span>') +
+      (m.license?'<span class="tag tag-license '+licClass(m.license)+'">'+m.license+'</span>':'<span class="tag tag-license" style="visibility:hidden;">4級</span>') +
+      (m.billing?'<span class="tag tag-billing">請求</span>':'') +
+    '</span>' +
+    '<span style="margin-left:auto;color:var(--text-sub);font-size:14px;flex-shrink:0;">›</span>' +
+  '</div>';
+}
+
 function renderMembers() {
   const container = document.getElementById('memberList');
   const search    = (document.getElementById('searchInput')?.value||'').toLowerCase();
@@ -1178,26 +1260,31 @@ function renderMembers() {
     return true;
   });
   if (!list.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon"></div><p>審判が登録されていません<br>「＋ 審判登録」で追加しましょう</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon"></div><p>審判・指導者が登録されていません<br>「＋ 登録」で追加しましょう</p></div>`;
     return;
   }
-  container.innerHTML = list.map(m => `
-    <div class="member-item" onclick="openMemberModal('${m.id}')" style="cursor:pointer;">
-      <span class="member-name">${m.name}</span>
-      <span class="member-tags">
-        ${m.team==='A'?`<span class="tag tag-team" style="background:#e0eaf7;color:#003087;border:1px solid #a0bfe0;">A</span>`:m.team==='B'?`<span class="tag tag-team" style="background:#e0f7fa;color:#0891b2;border:1px solid #80d8e4;">B</span>`:`<span class="tag tag-team" style="border:1px solid transparent;"></span>`}
-        ${m.license?`<span class="tag tag-license ${licClass(m.license)}">${m.license}</span>`:`<span class="tag tag-license" style="visibility:hidden;">4級</span>`}
-        ${m.billing?`<span class="tag tag-billing">請求</span>`:''}
-      </span>
-      <span style="margin-left:auto;color:var(--text-sub);font-size:14px;flex-shrink:0;">›</span>
-    </div>`).join('');
+  const referees = list.filter(m => getMemberRole(m) === 'referee');
+  const coaches  = list.filter(m => getMemberRole(m) === 'coach');
+  let html = '';
+  if (referees.length) {
+    html += '<div class="member-section-title">審判（' + referees.length + '名）</div>';
+    html += referees.map(renderMemberItem).join('');
+  }
+  if (coaches.length) {
+    html += '<div class="member-section-title">指導者（' + coaches.length + '名）</div>';
+    html += coaches.map(renderMemberItem).join('');
+  }
+  container.innerHTML = html;
 }
 
 function openMemberModal(id) {
   const m = id ? state.members.find(m => m.id==id) : null;
-  document.getElementById('memberModalTitle').textContent  = m ? '審判編集' : '審判登録';
+  const role = m ? getMemberRole(m) : 'referee';
+  document.getElementById('memberModalTitle').textContent  = m ? (role==='coach'?'指導者編集':'審判編集') : '登録';
   document.getElementById('memberId').value      = m ? m.id      : '';
   document.getElementById('memberName').value    = m ? m.name    : '';
+  document.getElementById('memberRole').value    = role;
+  onRoleChange();
   document.getElementById('memberLicense').value = m ? m.license : '';
   document.getElementById('memberTeam').value    = m ? (m.team||'') : '';
   document.getElementById('memberBilling').checked = m ? !!m.billing : false;
@@ -1228,6 +1315,7 @@ async function saveMember() {
     team:    document.getElementById('memberTeam').value,
     billing: document.getElementById('memberBilling').checked,
     note:    document.getElementById('memberNote').value,
+    role:    document.getElementById('memberRole').value,
   };
   if (!data.name) { showToast('氏名を入力してください'); return; }
   const ex = state.members.findIndex(m => m.id==data.id);
