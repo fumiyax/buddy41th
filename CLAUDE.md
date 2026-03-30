@@ -38,6 +38,7 @@
 | `index_ver23_before-comment-improve.html` | 2026-03-28 | コメント欄textarea化前 |
 | `index_ver25_before-role-split.html` | 2026-03-30 | 審判/指導者分離前 |
 | `index_ver26_before-composite.html` | 2026-03-30 | 審判/指導者複合管理化前 |
+| `index_ver27_before-upcoming-filter.html` | 2026-03-30 | 今後の予定フィルタ追加前 |
 
 ---
 

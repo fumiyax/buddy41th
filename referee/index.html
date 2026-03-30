@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver27</span>
+          <span class="badge-ver">ver28</span>
         </div>
       </div>
     </div>
@@ -841,7 +841,7 @@ function hasCoachLicense(m) {
 // ===== INIT =====
 function init() {
   try { document.getElementById('gasCodeText').value = GAS_CODE; } catch(e) {}
-  state.selectedMonth = 'current';
+  state.selectedMonth = 'upcoming';
   setTimeout(loadData, 200);
 }
 
@@ -933,16 +933,15 @@ function renderStats() {
   document.getElementById('statMatches').textContent = state.events.filter(e => (e.date||'').startsWith(ym)).length;
 }
 
-// ===== MONTH FILTER (過去分・今月・翌月) =====
+// ===== MONTH FILTER (過去分・今後の予定・今月・翌月) =====
 function renderMonthFilter() {
   const now    = new Date();
   const y      = now.getFullYear();
   const m      = now.getMonth();
-  const thisM  = `${y}-${String(m+1).padStart(2,'0')}`;
   const nextM  = `${m===11?y+1:y}-${String(m===11?1:m+2).padStart(2,'0')}`;
 
-  const filters = ['past', 'current', nextM];
-  const labels = { past: '過去分', current: `今月（${m+1}月）`, [nextM]: `翌月（${m===11?1:m+2}月）` };
+  const filters = ['past', 'upcoming', 'current', nextM];
+  const labels = { past: '過去分', upcoming: '今後の予定', current: `今月（${m+1}月）`, [nextM]: `翌月（${m===11?1:m+2}月）` };
   const container = document.getElementById('monthFilter');
   container.innerHTML = filters.map(f =>
     `<button class="month-btn ${state.selectedMonth===f?'active':''}" onclick="setMonthFilter('${f}')">${labels[f]}</button>`
@@ -964,7 +963,13 @@ function renderEvents() {
     .filter(ev => {
       if (!ev.date) return false;
       if (state.selectedMonth === 'past') return ev.date < today;
-      if (state.selectedMonth === 'current') return ev.date >= today && ev.date.startsWith(thisMonth);
+      if (state.selectedMonth === 'upcoming') {
+        const limit = new Date();
+        limit.setDate(limit.getDate() + 31);
+        const limitStr = limit.toISOString().slice(0,10);
+        return ev.date >= today && ev.date <= limitStr;
+      }
+      if (state.selectedMonth === 'current') return ev.date.startsWith(thisMonth);
       return ev.date.startsWith(state.selectedMonth||'');
     })
     .sort((a,b) => state.selectedMonth === 'past' ? (a.date > b.date ? -1 : 1) : (a.date < b.date ? -1 : 1));
