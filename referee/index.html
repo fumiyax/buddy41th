@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver28</span>
+          <span class="badge-ver">ver29</span>
         </div>
       </div>
     </div>
@@ -792,7 +792,7 @@ function deleteRow(sheetName, id) {
 // === LINE通知 ===
 const LINE_TOKEN = PropertiesService.getScriptProperties().getProperty('LINE_TOKEN');
 const LINE_GROUP_ID = PropertiesService.getScriptProperties().getProperty('LINE_GROUP_ID');
-const SITE_URL = 'https://fumiyax.github.io/buddy41th/';
+const SITE_URL = 'https://fumiyax.github.io/buddy41th/referee/';
 function notifyTomorrow() {
   const sh = getOrCreateSheet('matches');
   const rows = sh.getDataRange().getValues();
@@ -804,15 +804,58 @@ function notifyTomorrow() {
     try { rowDate = Utilities.formatDate(new Date(row[1]), 'Asia/Tokyo', 'yyyy-MM-dd'); } catch(e) { rowDate = String(row[1]); }
     if (rowDate === dateStr) {
       var title = row[3] || '（タイトルなし）';
-      var location = row[4] || '';
+      var loc = row[4] || '';
       var time = row[5] || '';
+      var type = row[2] === 'official' ? '公式戦' : '練習試合';
       var link = SITE_URL + '#event-' + row[0];
-      var msg = '【明日の試合】\\n' + title;
-      if (location) msg += '\\n会場: ' + location;
-      if (time) msg += '\\n時間: ' + time;
-      msg += '\\n\\n出欠確認はこちら↓\\n' + link;
-      sendLineMessage(msg);
+      var altText = '【明日の試合】' + title;
+      var infoRows = [];
+      if (loc) infoRows.push({ type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
+        { type: 'text', text: '📍 会場', size: 'sm', color: '#888888', flex: 0 },
+        { type: 'text', text: loc, size: 'sm', color: '#333333', flex: 1, wrap: true }
+      ]});
+      if (time) infoRows.push({ type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
+        { type: 'text', text: '⏰ 時間', size: 'sm', color: '#888888', flex: 0 },
+        { type: 'text', text: time, size: 'sm', color: '#333333', flex: 1 }
+      ]});
+      infoRows.push({ type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
+        { type: 'text', text: '⚽ 種別', size: 'sm', color: '#888888', flex: 0 },
+        { type: 'text', text: type, size: 'sm', color: '#333333', flex: 1 }
+      ]});
+      var flexContents = {
+        type: 'bubble',
+        header: {
+          type: 'box', layout: 'vertical', paddingTop: 'md', paddingBottom: 'md',
+          backgroundColor: '#1B5E20',
+          contents: [
+            { type: 'text', text: '⚽ 明日の試合', weight: 'bold', size: 'md', color: '#FFFFFF' }
+          ]
+        },
+        body: {
+          type: 'box', layout: 'vertical', spacing: 'md',
+          contents: [
+            { type: 'text', text: title, weight: 'bold', size: 'lg', wrap: true },
+            { type: 'separator' },
+            { type: 'box', layout: 'vertical', spacing: 'sm', contents: infoRows }
+          ]
+        },
+        footer: {
+          type: 'box', layout: 'vertical', spacing: 'sm',
+          contents: [
+            { type: 'button', style: 'primary', color: '#1B5E20',
+              action: { type: 'uri', label: '出欠確認する', uri: link } }
+          ]
+        }
+      };
+      sendLineFlexMessage(flexContents, altText);
     }
+  });
+}
+function sendLineFlexMessage(flexContents, altText) {
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+    method: 'post',
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LINE_TOKEN},
+    payload: JSON.stringify({to: LINE_GROUP_ID, messages: [{type: 'flex', altText: altText, contents: flexContents}]})
   });
 }
 function sendLineMessage(msg) {
