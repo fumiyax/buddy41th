@@ -95,3 +95,4 @@
 | `index_ver21_today-filter.html` | 2025-03-26 | フィルタを今日基準に変更 |
 | `index_ver22_before-restructure.html` | 2026-03-28 | ディレクトリ構成リストラクチャ前 |
 | `index_ver28_before-line-flex.html` | 2026-04-13 | LINE通知Flex Message化前 |
+| `index_ver29_before-redesign.html` | 2026-05-02 | デザインモダン化前 |
