@@ -58,11 +58,6 @@
     margin: 0 auto;
   }
   .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-img {
-    width: 44px; height: 44px;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-  }
   .logo-text {
     font-size: 16px; font-weight: 900;
     letter-spacing: 0.5px; color: #fff; line-height: 1.2;
@@ -447,7 +442,6 @@
 
   @media (max-width:480px) {
     .logo-text { font-size: 15px; }
-    .logo-img  { width: 40px; height: 40px; }
   }
 
   /* DEBUG PANEL */
@@ -475,12 +469,11 @@
 <header>
   <div class="header-inner">
     <div class="logo">
-      <img class="logo-img" src="../shared/buddylogo.png" alt="バディ世田谷" onerror="this.style.display='none'" />
       <div>
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver34</span>
+          <span class="badge-ver">ver35</span>
         </div>
       </div>
     </div>
