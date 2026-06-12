@@ -100,3 +100,4 @@
 | `index_ver31_before-sky-blue.html` | 2026-06-12 | Sky Blueカラーテーマ適用前 |
 | `index_ver32_before-logo-improve.html` | 2026-06-12 | ロゴ視認性向上前 |
 | `index_ver33_before-logo-transparent.html` | 2026-06-12 | ロゴ透明背景化前 |
+| `index_ver34_before-remove-logo.html` | 2026-06-12 | ロゴ画像削除前 |
