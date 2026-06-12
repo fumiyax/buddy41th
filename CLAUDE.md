@@ -98,3 +98,4 @@
 | `index_ver29_before-redesign.html` | 2026-05-02 | デザインモダン化前 |
 | `index_ver30_before-line-share.html` | 2026-06-12 | LINE共有ボタン追加前 |
 | `index_ver31_before-sky-blue.html` | 2026-06-12 | Sky Blueカラーテーマ適用前 |
+| `index_ver32_before-logo-improve.html` | 2026-06-12 | ロゴ視認性向上前 |
