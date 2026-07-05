@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver35</span>
+          <span class="badge-ver">ver37</span>
         </div>
       </div>
     </div>
@@ -483,7 +483,6 @@
     <div class="tab active" onclick="showTab('schedule')" id="tab-schedule">試合管理</div>
     <div class="tab" onclick="showTab('members')"  id="tab-members">審判一覧</div>
     <div class="tab" onclick="showTab('history')"  id="tab-history">公式戦実績</div>
-    <div class="tab" onclick="showTab('settings')" id="tab-settings">CONFIG</div>
   </nav>
 </header>
 
@@ -499,10 +498,7 @@
     </div>
     <div class="toolbar">
       <span class="toolbar-title">MATCHES</span>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" onclick="loadData()">更新</button>
-        <button class="btn btn-primary btn-sm" onclick="openEventModal()">＋ 試合追加</button>
-      </div>
+      <button class="btn btn-primary btn-sm" onclick="openEventModal()">＋ 試合追加</button>
     </div>
     <div id="monthFilter" style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;"></div>
     <div id="eventList"></div>
@@ -540,20 +536,6 @@
       <span class="toolbar-title">公式戦一覧</span>
     </div>
     <div id="historyList" style="margin-top:10px;"></div>
-  </section>
-
-  <!-- CONFIG -->
-  <section class="section" id="section-settings">
-    <div class="card">
-      <div class="card-title">データ操作</div>
-      <p style="font-size:13px;color:var(--text-sub);margin-bottom:12px;">スプレッドシートとの同期を手動で行います</p>
-      <button class="btn btn-primary" onclick="loadData()"> 全データ再読み込み</button>
-    </div>
-    <div class="card" style="margin-top:12px;">
-      <div class="card-title">GASコード</div>
-      <p style="font-size:13px;color:var(--text-sub);margin-bottom:12px;">Apps Scriptのソースコードを確認できます</p>
-      <button class="btn btn-ghost btn-sm" onclick="showGasCode()"> GASコードを表示</button>
-    </div>
   </section>
 
 </main>
@@ -867,7 +849,7 @@ function sendLineMessage(msg) {
 }`;
 
 // ===== STATE =====
-const GAS_URL    = 'https://script.google.com/macros/s/AKfycbzL-SQgXO1R58lwnglbr9dp0f7xzmlzCN2gozSgn4aK1rwkrrOD3OvC6e7vPzN2FTUTcg/exec';
+const API_BASE = '/api';
 const TYPE_LABELS  = { official:'公式戦', friendly:'練習試合' };
 const TYPE_CLASSES = { official:'badge-official', friendly:'badge-friendly' };
 const WEEKDAYS     = ['日','月','火','水','木','金','土'];
@@ -903,33 +885,29 @@ function toggleDebug() {
 }
 
 async function gasRequest(body) {
-  dbg('gasRequest開始: action=' + body.action);
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
+  const { action, ...params } = body;
+  const url = `${API_BASE}/${action}`;
+  dbg('API呼び出し: ' + url);
+
   try {
-    dbg('POST送信中...');
-    const res = await Promise.race([
-      fetch(GAS_URL, { method:'POST', body: JSON.stringify(body) }),
-      timeout
-    ]);
-    dbg('レスポンス受信: status=' + res.status);
-    const json = await res.json();
-    dbg('JSON解析完了: keys=' + Object.keys(json).join(','));
-    return json;
-  } catch(e) {
-    dbg('POST失敗: ' + e.message + ' → GETにフォールバック');
-    try {
-      const res = await Promise.race([
-        fetch(GAS_URL + '?action=' + body.action),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
-      ]);
-      dbg('GETレスポンス: status=' + res.status);
-      const json = await res.json();
-      dbg('GET JSON解析完了');
-      return json;
-    } catch(e2) {
-      dbg('GET失敗: ' + e2.message);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+
+    if (!res.ok) {
+      dbg('HTTPエラー: ' + res.status);
       return null;
     }
+
+    const json = await res.json();
+    dbg('レスポンス受信: keys=' + Object.keys(json).join(','));
+    return json;
+  } catch (error) {
+    dbg('API失敗: ' + error.message);
+    console.error('API error:', error);
+    return null;
   }
 }
 

@@ -1,0 +1,4 @@
+-- テーブル削除（外部キー制約があるため逆順）
+DROP TABLE IF EXISTS attendance CASCADE;
+DROP TABLE IF EXISTS matches CASCADE;
+DROP TABLE IF EXISTS referees CASCADE;

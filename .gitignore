@@ -1,1 +1,6 @@
 **/backup/
+_*/
+.DS_Store
+**/.DS_Store
+**/.env*.local
+**/node_modules/
