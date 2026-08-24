@@ -1,15 +1,16 @@
 # 01_BUDDY41TH - バディ世田谷41期
 
 ## 概要
-バディ世田谷41期の各種ツールをまとめた GitHub Pages サイト。
+バディ世田谷41期の各種ツールをまとめた Vercel でホストされているサイト。
 - リポジトリ: https://github.com/fumiyax/buddy41th
-- デプロイ: GitHub Pages（main ブランチ直接 push）
+- 本番URL: https://buddy41th-referee.vercel.app/
+- デプロイ: Vercel（main ブランチに push で自動デプロイ）
 
 ## 開発ルール
 
 ### バージョン管理
-- **index.html を修正するたびにヘッダーの ver 番号を1つ上げること**（`badge-ver` の表示テキスト）
-- GitHub Pages への反映に時間差があるため、ver 番号で最新かどうかを判別する
+- **referee/index.html を修正するたびにヘッダーの ver 番号を1つ上げること**（`badge-ver` の表示テキスト）
+- Vercel への反映に時間差があるため、ver 番号で最新かどうかを判別する
 
 ### バックアップ
 - **index.html を修正する前に必ずバックアップを取ること**
@@ -19,9 +20,8 @@
 
 ### Git 運用
 - `backup/` は `.gitignore` で除外されているため、**git add の対象にしないこと**
-- `_*/`（非デプロイプロジェクト）も `.gitignore` で除外済み
 - コミット対象は `referee/index.html` や `CLAUDE.md` など、除外パターン以外のファイルのみ
-- push は `main` ブランチに直接行う
+- push は `main` ブランチに直接行う（Vercel が自動デプロイ）
 
 ## ディレクトリ構成
 
