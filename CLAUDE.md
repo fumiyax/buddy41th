@@ -101,3 +101,4 @@
 | `index_ver32_before-logo-improve.html` | 2026-06-12 | ロゴ視認性向上前 |
 | `index_ver33_before-logo-transparent.html` | 2026-06-12 | ロゴ透明背景化前 |
 | `index_ver34_before-remove-logo.html` | 2026-06-12 | ロゴ画像削除前 |
+| `index_ver37_before-gcal-button.html` | 2026-08-25 | Googleカレンダー追加ボタン実装前 |

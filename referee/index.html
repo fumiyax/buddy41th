@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver37</span>
+          <span class="badge-ver">ver38</span>
         </div>
       </div>
     </div>
@@ -1026,7 +1026,8 @@ function renderEvents() {
       <div class="event-detail">
         <div class="event-footer" style="margin-top:0;padding-top:0;border-top:none;margin-bottom:12px;">
           <button class="btn btn-ghost btn-sm" onclick="toggleEvent('${ev.id}')">閉じる</button>
-          <div style="display:flex;gap:6px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="addToGoogleCalendar('${ev.id}')">📅 カレンダー</button>
             <button class="btn btn-ghost btn-sm" onclick="shareToLine('${ev.id}')">LINE共有</button>
             <button class="btn btn-ghost btn-sm" onclick="copyEventLink('${ev.id}')">リンクコピー</button>
             <button class="btn btn-ghost btn-sm" onclick="openEventModal('${ev.id}')">編集</button>
@@ -1370,6 +1371,57 @@ function shareToLine(eventId) {
 
   var lineUrl = 'https://line.me/R/share?text=' + encodeURIComponent(message);
   window.open(lineUrl, '_blank');
+}
+
+function addToGoogleCalendar(eventId) {
+  var ev = state.events.find(function(e) { return e.id == eventId; });
+  if (!ev) return;
+
+  var title = ev.title || '試合';
+  var location = ev.location || '';
+  var typeLabel = TYPE_LABELS[ev.type] || ev.type;
+  var description = '種別: ' + typeLabel;
+  if (ev.category) description += '\nカテゴリ: ' + ev.category;
+  if (ev.note) description += '\n\n' + ev.note;
+
+  // 日付処理（YYYYMMDD形式）
+  var dateStr = ev.date.replace(/-/g, '');
+  var startDateTime = dateStr;
+  var endDateTime = dateStr;
+
+  // 時間パース（例: "10:00〜12:00"）
+  if (ev.time) {
+    var timeMatch = ev.time.match(/(\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+      var startHour = ('0' + timeMatch[1]).slice(-2);
+      var startMin = timeMatch[2];
+      startDateTime = dateStr + 'T' + startHour + startMin + '00';
+
+      // 終了時刻を取得
+      var endMatch = ev.time.match(/[〜～~\-].*?(\d{1,2}):(\d{2})/);
+      if (endMatch) {
+        var endHour = ('0' + endMatch[1]).slice(-2);
+        var endMin = endMatch[2];
+        endDateTime = dateStr + 'T' + endHour + endMin + '00';
+      } else {
+        // 終了時刻がない場合、開始から2時間後
+        var d = new Date(ev.date + 'T' + startHour + ':' + startMin + ':00');
+        d.setHours(d.getHours() + 2);
+        var eh = ('0' + d.getHours()).slice(-2);
+        var em = ('0' + d.getMinutes()).slice(-2);
+        endDateTime = dateStr + 'T' + eh + em + '00';
+      }
+    }
+  }
+
+  var dates = startDateTime + '/' + endDateTime;
+  var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    '&text=' + encodeURIComponent(title) +
+    '&dates=' + dates +
+    '&details=' + encodeURIComponent(description) +
+    '&location=' + encodeURIComponent(location);
+
+  window.open(url, '_blank');
 }
 
 function openEventFromHash() {
