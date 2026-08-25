@@ -103,3 +103,4 @@
 | `index_ver34_before-remove-logo.html` | 2026-06-12 | ロゴ画像削除前 |
 | `index_ver37_before-gcal-button.html` | 2026-08-25 | Googleカレンダー追加ボタン実装前 |
 | `index_ver38_before-time-picker.html` | 2026-08-25 | 時間プルダウン選択実装前 |
+| `index_ver39_before-gcal-title.html` | 2026-08-25 | カレンダータイトル形式変更前 |
