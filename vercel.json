@@ -1,9 +1,6 @@
 {
-  "buildCommand": "echo 'No build needed'",
-  "installCommand": "echo 'No install needed'",
-  "rewrites": [
-    { "source": "/:path*", "destination": "/referee/:path*" }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
   "functions": {
     "api/**/*.js": {
       "maxDuration": 10

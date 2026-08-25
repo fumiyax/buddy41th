@@ -1,0 +1,7 @@
+{
+  "name": "buddy41th-referee",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cp -r referee public"
+  }
+}

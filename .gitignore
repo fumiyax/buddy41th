@@ -4,3 +4,4 @@ _*/
 **/.DS_Store
 **/.env*.local
 **/node_modules/
+public/
