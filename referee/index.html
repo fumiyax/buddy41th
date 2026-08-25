@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver38</span>
+          <span class="badge-ver">ver39</span>
         </div>
       </div>
     </div>
@@ -563,14 +563,46 @@
       <label>試合名</label>
       <input type="text" id="eventTitle" placeholder="例: 第5節 vs ○○FC" />
     </div>
+    <div class="form-group">
+      <label>会場</label>
+      <input type="text" id="eventLocation" placeholder="例: バディフィールド" />
+    </div>
     <div class="row">
       <div class="form-group">
-        <label>会場</label>
-        <input type="text" id="eventLocation" placeholder="例: バディフィールド" />
+        <label>開始時間</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="eventStartHour" style="flex:1;">
+            <option value="">--</option>
+            <option value="0">0時</option><option value="1">1時</option><option value="2">2時</option><option value="3">3時</option>
+            <option value="4">4時</option><option value="5">5時</option><option value="6">6時</option><option value="7">7時</option>
+            <option value="8">8時</option><option value="9">9時</option><option value="10">10時</option><option value="11">11時</option>
+            <option value="12">12時</option><option value="13">13時</option><option value="14">14時</option><option value="15">15時</option>
+            <option value="16">16時</option><option value="17">17時</option><option value="18">18時</option><option value="19">19時</option>
+            <option value="20">20時</option><option value="21">21時</option><option value="22">22時</option><option value="23">23時</option>
+          </select>
+          <select id="eventStartMin" style="flex:1;">
+            <option value="00">00分</option>
+            <option value="30">30分</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
-        <label>時間</label>
-        <input type="text" id="eventTime" placeholder="例: 10:00〜12:00" />
+        <label>終了時間</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="eventEndHour" style="flex:1;">
+            <option value="">--</option>
+            <option value="0">0時</option><option value="1">1時</option><option value="2">2時</option><option value="3">3時</option>
+            <option value="4">4時</option><option value="5">5時</option><option value="6">6時</option><option value="7">7時</option>
+            <option value="8">8時</option><option value="9">9時</option><option value="10">10時</option><option value="11">11時</option>
+            <option value="12">12時</option><option value="13">13時</option><option value="14">14時</option><option value="15">15時</option>
+            <option value="16">16時</option><option value="17">17時</option><option value="18">18時</option><option value="19">19時</option>
+            <option value="20">20時</option><option value="21">21時</option><option value="22">22時</option><option value="23">23時</option>
+          </select>
+          <select id="eventEndMin" style="flex:1;">
+            <option value="00">00分</option>
+            <option value="30">30分</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="form-group">
@@ -1165,7 +1197,23 @@ function openEventModal(id) {
   document.getElementById('eventType').value     = ev ? ev.type     : 'league';
   document.getElementById('eventTitle').value    = ev ? ev.title    : '';
   document.getElementById('eventLocation').value = ev ? ev.location : '';
-  document.getElementById('eventTime').value     = ev ? ev.time     : '';
+
+  // 時間を解析して4つのプルダウンに設定
+  let startHour = '', startMin = '00', endHour = '', endMin = '00';
+  if (ev && ev.time) {
+    const timeMatch = ev.time.match(/(\d{1,2}):(\d{2})[〜～~\-](\d{1,2}):(\d{2})/);
+    if (timeMatch) {
+      startHour = timeMatch[1];
+      startMin = timeMatch[2];
+      endHour = timeMatch[3];
+      endMin = timeMatch[4];
+    }
+  }
+  document.getElementById('eventStartHour').value = startHour;
+  document.getElementById('eventStartMin').value  = startMin;
+  document.getElementById('eventEndHour').value   = endHour;
+  document.getElementById('eventEndMin').value    = endMin;
+
   document.getElementById('eventCategory').value = ev ? ev.category : '';
   document.getElementById('eventFileUrl').value  = ev ? ev.fileUrl  : '';
   document.getElementById('eventNote').value     = ev ? ev.note     : '';
@@ -1178,6 +1226,13 @@ function closeAllModals() {
 function closeEventModal()  { document.getElementById('eventOverlay').classList.remove('show'); }
 
 async function saveEvent() {
+  // 時間を4つのプルダウンから結合
+  const startHour = document.getElementById('eventStartHour').value;
+  const startMin = document.getElementById('eventStartMin').value;
+  const endHour = document.getElementById('eventEndHour').value;
+  const endMin = document.getElementById('eventEndMin').value;
+  const time = (startHour && endHour) ? `${startHour}:${startMin}〜${endHour}:${endMin}` : '';
+
   const data = {
     action:'saveEvent',
     id:       document.getElementById('eventId').value || Date.now().toString(),
@@ -1185,7 +1240,7 @@ async function saveEvent() {
     type:     document.getElementById('eventType').value,
     title:    document.getElementById('eventTitle').value,
     location: document.getElementById('eventLocation').value,
-    time:     document.getElementById('eventTime').value,
+    time:     time,
     category: document.getElementById('eventCategory').value,
     fileUrl:  document.getElementById('eventFileUrl').value,
     note:     document.getElementById('eventNote').value,
