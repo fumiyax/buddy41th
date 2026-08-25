@@ -473,7 +473,7 @@
         <div class="logo-text">バディ世田谷審判管理</div>
         <div class="logo-badges">
           <span class="badge-41">41TH</span>
-          <span class="badge-ver">ver40</span>
+          <span class="badge-ver">ver41</span>
         </div>
       </div>
     </div>
@@ -1432,9 +1432,8 @@ function addToGoogleCalendar(eventId) {
   var ev = state.events.find(function(e) { return e.id == eventId; });
   if (!ev) return;
 
-  // タイトルから「vs チーム名」を抽出して「BUDDY VS チーム名」形式にする
-  var teamMatch = ev.title ? ev.title.match(/vs\s+(.+)/i) : null;
-  var title = teamMatch ? 'BUDDY VS ' + teamMatch[1] : (ev.title || '試合');
+  // 試合名を「BUDDY VS 試合名」形式にする
+  var title = 'BUDDY VS ' + (ev.title || '試合');
 
   var location = ev.location || '';
   var typeLabel = TYPE_LABELS[ev.type] || ev.type;

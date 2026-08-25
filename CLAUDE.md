@@ -104,3 +104,4 @@
 | `index_ver37_before-gcal-button.html` | 2026-08-25 | Googleカレンダー追加ボタン実装前 |
 | `index_ver38_before-time-picker.html` | 2026-08-25 | 時間プルダウン選択実装前 |
 | `index_ver39_before-gcal-title.html` | 2026-08-25 | カレンダータイトル形式変更前 |
+| `index_ver40_before-simple-title.html` | 2026-08-25 | カレンダータイトルロジック簡略化前 |
