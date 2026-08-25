@@ -2,11 +2,10 @@
   "buildCommand": "echo 'No build needed'",
   "installCommand": "echo 'No install needed'",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/referee/api/:path*" },
     { "source": "/:path*", "destination": "/referee/:path*" }
   ],
   "functions": {
-    "referee/api/**/*.js": {
+    "api/**/*.js": {
       "maxDuration": 10
     }
   }
