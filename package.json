@@ -6,6 +6,6 @@
     "build": "cp -r referee public"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.6"
+    "@neondatabase/serverless": "^1.1.0"
   }
 }
